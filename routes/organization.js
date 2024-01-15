@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
       let {org_name,logo,email, phone,ent} = req.body;
         try {  
           await client.query(
-            `INSERT INTO "Organisations" (org_name,logo,email, phone,"Has_entity","Organization_id") VALUES($1, $2, $3, $4,$5,$6) RETURNING *`,
+            `INSERT INTO "organizations" (org_name,logo,email, phone,"Has_entity","Organization_id") VALUES($1, $2, $3, $4,$5,$6) RETURNING *`,
             [org_name,logo,email, phone,ent,id]
           );
           await client.query('COMMIT');
@@ -35,7 +35,7 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req,res)=>{
   try {
-    await pool.query(`SELECT * from "Organisations"`, (err, response) => {
+    await pool.query(`SELECT * from "organizations"`, (err, response) => {
       if (err) {
         console.log(err.stack);
       } else {
@@ -55,7 +55,7 @@ router.get('/:id', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const response = await client.query('SELECT * FROM "Organisations" WHERE "Organization_id" = $1', [id]);
+    const response = await client.query('SELECT * FROM "organizations" WHERE "Organization_id" = $1', [id]);
     const organization = response.rows[0];
     res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
     await client.query('COMMIT');
@@ -100,7 +100,7 @@ router.put('/:id', async (req, res) => {
      updateValues.push(ent);
        updateFields.push('"Has_entity" = $' + updateValues.length);
      }
-    const updateQuery = `UPDATE "Organisations" SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
+    const updateQuery = `UPDATE "organizations" SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
     const values = updateValues.concat(org_id);
     const response = await client.query(updateQuery, values);
     if (response.rows.length > 0) {
@@ -125,7 +125,7 @@ router.put('/:id', async (req, res) => {
 router.delete("/:id", async (req, res) => {
 
   const query = {
-    text: `DELETE FROM "Organisations" WHERE "Organization_id" = $1 RETURNING *`,
+    text: `DELETE FROM "organizations" WHERE "Organization_id" = $1 RETURNING *`,
     values: [req.params.id]
   }
 

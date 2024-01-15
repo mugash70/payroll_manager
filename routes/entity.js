@@ -10,12 +10,12 @@ router.post("/", async (req, res) => {
     try {
 
       await client.query('BEGIN');
-      var id = generateRandomNumber('M')
-      let {ent_id ,ent_name,phone,email,payment,org_id,payment_period,Entity_id} = req.body;
+      var id = generateRandomNumber('O')
+      let {org_name,logo,email, phone,ent} = req.body;
         try {  
           await client.query(
-            `INSERT INTO "Entities" (ent_id ,ent_name,phone,email,payment,org_id,payment_period,Entity_id) VALUES($1, $2, $3, $4,$5,$6,$7,$8) RETURNING *`,
-            [ent_id ,ent_name,phone,email,payment,org_id,payment_period,Entity_id]
+            `INSERT INTO "enitites" (org_name,logo,email, phone,"Has_entity","Organization_id") VALUES($1, $2, $3, $4,$5,$6) RETURNING *`,
+            [org_name,logo,email, phone,ent,id]
           );
           await client.query('COMMIT');
           res.json("created successfully!");
@@ -35,7 +35,7 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req,res)=>{
   try {
-    await pool.query(`SELECT * from "Entities"`, (err, response) => {
+    await pool.query(`SELECT * from "enitites"`, (err, response) => {
       if (err) {
         console.log(err.stack);
       } else {
@@ -55,14 +55,14 @@ router.get('/:id', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const response = await client.query('SELECT * FROM "Entities" WHERE "Entity_id" = $1', [id]);
-    const entity = response.rows[0];
-    res.json([entity, `This ${id} shows that entity information has been retrieved successfully`]);
+    const response = await client.query('SELECT * FROM "enitites" WHERE "Organization_id" = $1', [id]);
+    const organization = response.rows[0];
+    res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
     await client.query('COMMIT');
   } catch (error) {
     await client.query('ROLLBACK');
     console.error(error.message);
-    res.status(500).json('Error occurred while fetching entity information');
+    res.status(500).json('Error occurred while fetching organization information');
   } finally {
     client.release();
   }
@@ -100,7 +100,7 @@ router.put('/:id', async (req, res) => {
      updateValues.push(ent);
        updateFields.push('"Has_entity" = $' + updateValues.length);
      }
-    const updateQuery = `UPDATE "Entities" SET ${updateFields.join(', ')} WHERE "Entity_id" = $${updateValues.length + 1} RETURNING *`;
+    const updateQuery = `UPDATE "enitites" SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
     const values = updateValues.concat(org_id);
     const response = await client.query(updateQuery, values);
     if (response.rows.length > 0) {
@@ -108,12 +108,12 @@ router.put('/:id', async (req, res) => {
       res.json('Successfully updated');
     } else {
       await client.query('ROLLBACK');
-      res.status(404).json('entity not found');
+      res.status(404).json('Organization not found');
     }
   } catch (error) {
     await client.query('ROLLBACK');
     console.error(error.message);
-    res.status(500).json('Error occurred while updating entity');
+    res.status(500).json('Error occurred while updating organization');
   } finally {
     client.release();
   }
@@ -125,7 +125,7 @@ router.put('/:id', async (req, res) => {
 router.delete("/:id", async (req, res) => {
 
   const query = {
-    text: `DELETE FROM "Entities" WHERE "Entity_id" = $1 RETURNING *`,
+    text: `DELETE FROM "enitites" WHERE "Organization_id" = $1 RETURNING *`,
     values: [req.params.id]
   }
 

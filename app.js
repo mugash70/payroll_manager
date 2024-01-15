@@ -13,6 +13,7 @@ const cookieP=require('cookie-parser')
 const authRoutes = require("./routes/auth");
 const OrgRoutes = require("./routes/organization");
 const uploadpic = require("./routes/configs/logoUpload")
+const EmpRoute = require("./routes/employees")
 //middleware
 app.use(cors());
 
@@ -32,7 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/user', authRoutes);
 app.use('/organization', OrgRoutes);
 app.use('logoupload', uploadpic);
-
+app.use('/employees', EmpRoute);
 
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 if (process.env.NODE_ENV === 'production') {
