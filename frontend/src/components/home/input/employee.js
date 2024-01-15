@@ -20,6 +20,7 @@ import { Button, Modal,
     Upload, } from 'antd';
 import axios from 'axios';
 import {BASE_API_URL} from '../../../actions/types'
+import {post_data} from '../../../actions/all'
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 const normFile = (e) => {
@@ -109,10 +110,9 @@ const Employee = () => {
       ...userData,
       pic_url: pic_url
     };
-    console.log(Adddata);
-    setOpen(false);
-    // add2User(Adddata); 
-    // onClose();
+  setOpen(false);
+  await post_data(Adddata,'/employee','employees'); 
+
   }
 
   const handleInputChange = (event) => {

@@ -3,7 +3,8 @@ import axios from 'axios';
 import {LOADED_FAIL,LOADED,BASE_API_URL} from './types'
 
 export const post_data = (postdata,path,types) => async(dispatch) => {
-    const config = { headers: { "Content-type": "application/json" } };
+  console.log(postdata,path,types);  
+  const config = { headers: { "Content-type": "application/json" } };
     const body = JSON.stringify(postdata);
     await axios.post(`${BASE_API_URL}${path}`, body, config)
       .then((res) => {dispatch({ type: LOADED, payload: res.data, dataType: types });})
