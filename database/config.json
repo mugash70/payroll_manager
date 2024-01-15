@@ -1,0 +1,10 @@
+{
+    "development": {
+        "username": "postgres",
+        "password": "M",
+        "database": "v2_payroll",
+        "host": "localhost",
+        "dialect": "postgres",
+        "port":5432
+    }
+}
