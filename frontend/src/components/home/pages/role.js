@@ -1,100 +1,102 @@
-import React from 'react';
-import { Table } from 'antd';
+import React, { useEffect,useState }  from 'react';
+import { useDispatch,useSelector  } from 'react-redux';
+import { Table,Button,Row,Col } from 'antd';
 import Layoutx  from '../../default/layout';
+
+import Grad from '../../home/input/grades'
+
+import Spinner from '../../default/spinner';
+import Confrim from '../../default/confrim'
 import {post_data,get_data,update_data,del_data} from '../../../actions/all'
+
+
+const breadcrumbs = ['dashboard','roles'];
+const RoleDash = () =>{
+const [reloadKey, setReloadKey] = useState(0);
+
+const handleReload = () => {
+  setReloadKey(prevKey => prevKey + 1);
+};
 
 const columns = [
   {
-    title: 'Name',
-    dataIndex: 'name',
-    filters: [
-      {
-        text: 'Joe',
-        value: 'Joe',
-      },
-      {
-        text: 'Jim',
-        value: 'Jim',
-      },
-      {
-        text: 'Submenu',
-        value: 'Submenu',
-        children: [
-          {
-            text: 'Green',
-            value: 'Green',
-          },
-          {
-            text: 'Black',
-            value: 'Black',
-          },
-        ],
-      }, ],
-    onFilter: (value, record) => record.name.indexOf(value) === 0,
-    sorter: (a, b) => a.name.length - b.name.length,
+    title: 'Id',
+    dataIndex: 'grade_id',
+    defaultSortOrder: 'descend',
+    sorter: (a, b) => a.grade_id - b.grade_id,
+  },
+  {
+    title: 'Grade/Role',
+    dataIndex: 'grade_name',
+    onFilter: (value, record) => record.grade_name.indexOf(value) === 0,
+    sorter: (a, b) => a.grade_name.length - b.grade_name.length,
     sortDirections: ['descend'],
+    width: '40%',
   },
   {
-    title: 'Grade',
-    dataIndex: 'grade',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
-  },
-  {
-    title: 'Age',
-    dataIndex: 'age',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
-  },
-  {
-    title: 'Salary',
+    title: 'Grade salary',
     dataIndex: 'salary',
     defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
+    sorter: (a, b) => a.salaray - b.salaray,
+    width: '40%',
   },
   {
-    title: 'Address',
-    dataIndex: 'address',
-    filters: [{text: 'London',value: 'London',},{text: 'New York',value: 'New York',},],
-    onFilter: (value, record) => record.address.indexOf(value) === 0,
+    title: 'payment_period',
+    dataIndex: 'payment_period',
+    defaultSortOrder: 'descend',
+    sorter: (a, b) => a.payment_period - b.payment_period,
   },
-  {
-    title: 'Department',
-    dataIndex: 'department',
-    filters: [{text: 'London',value: 'London',},{text: 'New York',value: 'New York',},],
-    onFilter: (value, record) => record.address.indexOf(value) === 0,
-  },
+  {title: 'Action',
+  width: '40%',
+  render: (text, record) => (
+    <div style={{ marginLeft: 'auto' }}>
+      <Row gutter={[20]}>
+        <Col>
+        {<Grad  key={record.grade_id} record={record} type="update"/>}
+        </Col>
+        <Col>      
+        {<Confrim  msg ={'Are sure you want ot delete the Department ?'}
+        // 
+         handleDelete={() =>handleDel(record.grade_id)} 
+        />}
+          </Col>
+      </Row>
+      </div>
+  ),
+},
+  
 ];
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sydney No. 1 Lake Park',
-  },
-  {
-    key: '4',
-    name: 'Jim Red',
-    age: 32,
-    address: 'London No. 2 Lake Park',
-  },
-];
+const dispatch = useDispatch()
+const gradesData = useSelector((state) =>  state.all.grades.data);
+const isLoading = useSelector((state) =>  state.all.isLoading);
+const error = useSelector((state) => state.error.id);
+
+const handleDel= async (grade_id)=>{ ;try { await del_data(`/grades/${grade_id}`, 'grades')(dispatch); } catch (err) {console.error(err);}finally{ handleReload()}}
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      await get_data('/grades', 'grades')(dispatch); 
+      handleReload()  
+    } catch (err) {
+      console.error(err);
+    }finally{
+      handleReload();
+    }
+  };
+  fetchData();
+}, [dispatch,reloadKey]);
 
 const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};
 
-const breadcrumbs = ['dashboard','employee'];
-const Employeedash = () => <Table columns={columns} dataSource={data} onChange={onChange} />;
-const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Employeedash} />;
+
+
+if (isLoading){
+  return <Spinner/>
+}else{
+   return(<Table columns={columns} dataSource={gradesData} onChange={onChange} />)
+}
+}
+
+const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={RoleDash} Buttons={Grad} />;
 export default Home;

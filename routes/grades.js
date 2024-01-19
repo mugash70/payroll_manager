@@ -10,15 +10,16 @@ router.post("/", async (req, res) => {
     try {
 
       await client.query('BEGIN');
-      var id = generateRandomNumber('O')
-      let {org_name,logo,email, phone,ent} = req.body;
+      var id = generateRandomNumber('D')
+      console.log(req.body);
+      let {grade_name,salary,payment_period, phone,ent} = req.body;
         try {  
-          await client.query(
-            `INSERT INTO "Organisations" (org_name,logo,email, phone,"Has_entity","Organization_id") VALUES($1, $2, $3, $4,$5,$6) RETURNING *`,
-            [org_name,logo,email, phone,ent,id]
+         const result = await client.query(
+            `INSERT INTO grades (grade_name,salary,payment_period) VALUES($1, $2, $3) RETURNING *`,
+            [grade_name,salary,payment_period]
           );
           await client.query('COMMIT');
-          res.json("created successfully!");
+          res.json(result.rows);
         } catch (error) {
           await client.query('ROLLBACK');
           console.error(error.message);
@@ -35,9 +36,10 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req,res)=>{
   try {
-    await pool.query(`SELECT * from "Organisations"`, (err, response) => {
+    await pool.query(`SELECT * from grades`, (err, response) => {
       if (err) {
         console.log(err.stack);
+        res.status(500).json("Error Fetching!");
       } else {
         res.status(200).json(response.rows);
       }
@@ -55,7 +57,7 @@ router.get('/:id', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const response = await client.query('SELECT * FROM "Organisations" WHERE "Organization_id" = $1', [id]);
+    const response = await client.query('SELECT * FROM grades WHERE "Organization_id" = $1', [id]);
     const organization = response.rows[0];
     res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
     await client.query('COMMIT');
@@ -75,21 +77,21 @@ router.put('/:id', async (req, res) => {
   try {
     await client.query('BEGIN');
     const org_id = req.params.id;
-    const { org_name, logo, email, phone, ent} = req.body;
+    const { grade_name, salary, payment_period, phone, ent} = req.body;
 
     const updateValues = [];
     const updateFields = [];
-    if (org_name) {
-      updateValues.push(org_name);
-      updateFields.push('org_name = $' + updateValues.length);
+    if (grade_name) {
+      updateValues.push(grade_name);
+      updateFields.push('grade_name = $' + updateValues.length);
     }
-    if (logo) {
-      updateValues.push(logo);
-      updateFields.push('logo = $' + updateValues.length);
+    if (salary) {
+      updateValues.push(salary);
+      updateFields.push('salary = $' + updateValues.length);
     }
-    if (email) {
-      updateValues.push(email);
-      updateFields.push('email = $' + updateValues.length);
+    if (payment_period) {
+      updateValues.push(payment_period);
+      updateFields.push('payment_period = $' + updateValues.length);
     }
     if (phone) {
       updateValues.push(phone);
@@ -100,7 +102,7 @@ router.put('/:id', async (req, res) => {
      updateValues.push(ent);
        updateFields.push('"Has_entity" = $' + updateValues.length);
      }
-    const updateQuery = `UPDATE "Organisations" SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
+    const updateQuery = `UPDATE grades SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
     const values = updateValues.concat(org_id);
     const response = await client.query(updateQuery, values);
     if (response.rows.length > 0) {
@@ -123,18 +125,17 @@ router.put('/:id', async (req, res) => {
 
 // // delete route
 router.delete("/:id", async (req, res) => {
-
+  console.log(req.params.id);
   const query = {
-    text: `DELETE FROM "Organisations" WHERE "Organization_id" = $1 RETURNING *`,
+    text: `DELETE FROM grades WHERE grade_id = $1 RETURNING *`,
     values: [req.params.id]
   }
-
   // callback
   await pool.query(query, (err, response) => {
     if (err) {
       console.log(err.stack)
     } else {
-      res.json("Successfully deleted!");
+      res.json(response.rows);
     }
   });
 });

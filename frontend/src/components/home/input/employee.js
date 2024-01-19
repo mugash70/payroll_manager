@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState,useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { PlusOutlined } from '@ant-design/icons';
 import { useDispatch,useSelector  } from 'react-redux';
@@ -22,7 +22,6 @@ import { Button, Modal,
 import axios from 'axios';
 import {BASE_API_URL} from '../../../actions/types'
 import {post_data,handleUpload} from '../../../actions/all'
-const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 const normFile = (e) => {
     if (Array.isArray(e)) {
@@ -33,7 +32,8 @@ const normFile = (e) => {
 
 
 
-const Employee = () => {
+const Employee = ({ type,record }) => {
+
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [open, setOpen] = useState(false);
@@ -45,40 +45,69 @@ const Employee = () => {
     right: 0,
   });
   const draggleRef = useRef(null);
-  const showModal = () => {
+ const showModal = () => {
     setOpen(true);
   };
   const handleGradeChange = (event) => {
-   
     const selectedGradeId = parseInt(event);
-
     const grade = gradeData.find(grade => grade.grade_id === selectedGradeId);
     setSelectedGrade(grade);
-
     setUserData({ ...userData, grade: grade.grade_id, grade_id: grade.grade_id, jobs: '',salary: grade.salary });
   };
   const handleContractChange = (event) => {
-  
     setUserData({ ...userData, contracttype: event });
   };
   const [userData, setUserData] = useState({
-    // Fnames:'',
-    // Lnames:'',
-    // address1:'',
-    // address2:'',
-    // NID:'',
-    // grade:'',
-    // salary:'',
-    // phone:'',
-    // email:'',
-    // nssf:'',
-    // nhif:'',
-    // pin:'',
-    // pic_url:[],
-    // contracttype:'',
-    // periodf:'',
-    // periodt:'',
+    Fnames:'',
+    Lnames:'',
+    address1:'',
+    address2:'',
+    NID:'',
+    grade:'',
+    salary:'',
+    phone:'',
+    email:'',
+    nssf:'',
+    nhif:'',
+    pin:'',
+    pic_url:[],
+    contracttype:'',
+    periodf:'',
+    periodt:'',
   });
+
+
+useEffect(() => {
+  if (record) {
+    setUserData({
+      Fnames: record.firstname,
+      Lnames: record.lastname,
+      address1: record.address1,
+      address2: record.address2,
+      NID: record.ID,
+      grade: record.grade_id,
+      salary: record.salary,
+      phone: record.phone,
+      email: record.email,
+      nssf: record.nssf,
+      nhif: record.nhif,
+      pin: record.pin,
+      pay_id:record.pay_id,
+      pic_url: record.pic_link,
+      contracttype: record.contract,
+      periodf: record.period_from,
+      periodt: record.period_to,
+      account_type: record.account_type,
+      bankbranch: record.bank_branch,
+      bankname: record.bank_name,
+      bankaccountno: record.account_no,
+    });
+  }
+}, [record]); 
+if(record){
+  console.log(record);
+}
+
     const gradeData = [
       { grade_id: 1, grade_name: 'Grade A' },
       { grade_id: 2, grade_name: 'Grade B' },
@@ -102,7 +131,6 @@ const Employee = () => {
       ...userData,
       pic_url: selectedImage 
     };
-  console.log(Adddata);
 
   await post_data(Adddata,'/employees','employees')(dispatch);
   setOpen(false);
@@ -188,7 +216,7 @@ const Employee = () => {
 
 
   const renderBankDetails = () => {
-    if (userData.payment == 'bank') {
+    if (userData.payment == '2') {
       return (
 
 <Row gutter={16}>
@@ -230,7 +258,11 @@ const Employee = () => {
   };
   return (
     <>
+    {type == 'create' ? (
       <Button onClick={showModal}>Add employees</Button>
+    ) : (
+      <Button onClick={showModal} type="primary">View</Button>
+    )}
       <Modal
         title={
           <div
@@ -239,14 +271,16 @@ const Employee = () => {
             onMouseOut={() => {setDisabled(true);}}
             onFocus={() => {}}onBlur={() => {}}
            >
-            <h3>Add Employee</h3>
+            {type == 'create' ? (
+            <h3>Add Employee</h3>):(<h3>Update Employee Details</h3>)}
           </div>
         }open={open} width={1000} onOk={handleAddUser} onCancel={handleCancel} modalRender={(modal) => (<Draggable disabled={disabled} bounds={bounds} nodeRef={draggleRef} onStart={(event, uiData) => onStart(event, uiData)}><div ref={draggleRef}>{modal}</div></Draggable>)}>
         
         
         <Form labelCol={{span: 5,}} wrapperCol={{span: 17,}}layout="horizontal" style={{maxWidth:'100%',}} onFinish={onFinish}>
-
-        <Row>
+  
+{type == 'create' ? (
+  <Row>
         <Col span={12}>
       
         <Form.Item label="First names"
@@ -273,7 +307,6 @@ const Employee = () => {
             value={userData.address2}
             onChange={handleInputChange}  />
         </Form.Item>
-
         <Form.Item label="ID/Passport"
           rules={[
             {
@@ -323,7 +356,6 @@ const Employee = () => {
         <Form.Item label="Contract type" >
     
               <Select 
-                initialValue="2"
                 name="contracttype"
                 onChange={handleContractChange} 
                 value={userData.contracttype}
@@ -332,7 +364,6 @@ const Employee = () => {
                 <Select.Option value="2">Permanent and Pensionable</Select.Option>
               </Select>
       </Form.Item>
-      
         <Form.Item label="Payment" name="payment">
           <Select
           initialValues="cash"
@@ -354,7 +385,7 @@ const Employee = () => {
 
         </Col>
 
-        <Col span={12}>
+      <Col span={12}>
 
         <Form.Item label="Last names"
         name="Lnames"
@@ -365,7 +396,7 @@ const Employee = () => {
           },]}>
              <Input
               name="Lnames"
-              value={userData.Fnames}
+              value={userData.Lnames}
               onChange={handleInputChange} 
           />
         </Form.Item>
@@ -381,11 +412,6 @@ const Employee = () => {
         value={userData.periodt}>
         <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodt', dateString)} />;
       </Form.Item>
-    
-
-
-
-    
         <Form.Item label="Phone"
          name="phone"
          onChange={handleInputChange} 
@@ -429,9 +455,6 @@ const Employee = () => {
           />
         </Form.Item>
     
-    
-
-
         <Form.Item label="Upload" 
         valuePropName="fileList" 
         getValueFromEvent={normFile}
@@ -452,7 +475,7 @@ const Employee = () => {
               }}
               type="button"
             >
-              {/* <PlusOutlined /> */}
+              <PlusOutlined />
               <div
                 style={{
                   marginTop: 8,
@@ -464,7 +487,189 @@ const Employee = () => {
           </Upload>
         </Form.Item>
         </Col>
+  </Row>
+
+):( record ? (
+        <Row>
+        <Col span={12}>
+        <Form.Item label="First names"
+        rules={[
+          {
+            required: true,
+            message: 'Please input the Last Names!',
+          },]}>
+             <Input
+              name="Fnames"
+              value={userData.Fnames}
+              onChange={handleInputChange} 
+          />
+        </Form.Item>
+        <Form.Item label="Address 1"
+
+        >
+          <Input   name="address1"
+              value={userData.address1}
+              onChange={handleInputChange}  />
+        </Form.Item>
+        <Form.Item label="Address 2" 
+        >
+          <Input 
+            name="address2"
+            value={userData.address2}
+            onChange={handleInputChange}  />
+        </Form.Item>
+        <Form.Item label="ID/Passport"
+          rules={[
+            {
+              required: true,
+              message: 'Please input the ID/Passport!',
+            },
+          ]}>
+             <Input
+              name="NID"
+              value={userData.NID}
+              onChange={handleInputChange} 
+          />
+        </Form.Item>
+        <Form.Item label="grade"
+         rules={[
+           {
+             required: true,
+             message: 'Please input the Grade!',
+           },
+         ]}>
+         
+          <Select
+              initialValues={gradeData.length > 0 ? gradeData[0].grade_id : ''}
+              onChange={handleGradeChange}
+              value={userData.grade}
+            >
+              {gradeData.map(grade => (
+                <Select.Option key={grade.grade_id} value={grade.grade_id}>
+                  {grade.grade_name}
+                </Select.Option>
+              ))}
+            </Select>
+
+      </Form.Item>
+        {/* <Form.Item label="job"
+         name="job">
+            <Select
+            value={selectedGrade ? selectedGrade.id : ''}
+            // onChange={handlejobChange}
+            >
+            {selectedGrade.jobs.map(job => (
+              <div>{job}</div>
+            // <Select.Option key={job} value={job}>{job}</Select.Option>
+            ))}
+          </Select>
+        </Form.Item> */}
+        <Form.Item label="Contract type" >
+    
+              <Select 
+                initialValue="2"
+                name="contracttype"
+                onChange={handleContractChange} 
+                value={userData.contracttype}
+              >
+                <Select.Option value="1">Contract</Select.Option>
+                <Select.Option value="2">Permanent and Pensionable</Select.Option>
+              </Select>
+      </Form.Item>
+        <Form.Item label="Payment"  >
+          <Select
+          value={userData.pay_id}
+          onChange={handlePayChange}
+          >
+            <Select.Option value='1'>Mpesa</Select.Option>
+            <Select.Option value="2">Bank</Select.Option>
+            <Select.Option value="3">Cash</Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item label="Salary" 
+
+        >
+          <Input
+          name="salary"
+          value={userData.salary}
+          onChange={handleInputChange} 
+          />
+        </Form.Item>
+
+        </Col>
+
+        <Col span={12}>
+
+        <Form.Item label="Last names"
+    
+        rules={[
+          {
+            required: true,
+            message: 'Please input the Last Names!',
+          },]}>
+             <Input
+              name="Lnames"
+              value={userData.Lnames}
+              onChange={handleInputChange} 
+          />
+        </Form.Item>
+      <Form.Item
+        label="Period From"
+  
+        value={userData.periodf}>
+       <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodf', dateString)} />
+      </Form.Item>
+      <Form.Item
+        label="Period To"
+  
+        value={userData.periodt}>
+        <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodt', dateString)} />;
+      </Form.Item>
+        <Form.Item label="Phone"
+         onChange={handleInputChange} 
+         rules={[
+           {
+             required: true,
+             message: 'Please input the phone Number!',
+           },
+         ]}
+        >
+          <Input name="phone"
+              value={userData.phone}
+              onChange={handleInputChange} />
+        </Form.Item>
+        <Form.Item label="Email">
+             <Input
+              name="email"
+              value={userData.email}
+              onChange={handleInputChange} 
+          />
+        </Form.Item>
+        <Form.Item label="Nssf" >
+             <Input
+              name="nssf"
+              value={userData.nssf}
+              onChange={handleInputChange} 
+          />
+        </Form.Item>
+        <Form.Item label="Nhif" >
+             <Input
+              name="nhif"
+              value={userData.nhif}
+              onChange={handleInputChange} 
+          />
+        </Form.Item>
+        <Form.Item label="Tax pin" >
+          <Input
+              name="pin"
+              value={userData.pin}
+              onChange={handleInputChange} 
+          />
+        </Form.Item>
+     </Col>
         </Row>
+):null)}
+
         {renderBankDetails()}
        
       </Form>

@@ -1,4 +1,4 @@
-import {LOADED,LOADED_FAIL,CLEAR_ALL} from '../actions/types'
+import {LOADED,LOADED_FAIL,CLEAR_ALL,SET_LOADING} from '../actions/types'
 
 
 var initialState = {
@@ -14,24 +14,29 @@ var initialState = {
 }
 export default function Allreducer(state = initialState, action) {
     switch (action.type) {
+      case SET_LOADING:
+        return {
+          ...state,
+          isLoading: action.isLoading,
+        };
       case LOADED:
         const newData = Array.isArray(action.payload) ? action.payload : [];
         return {
           ...state,
           [action.dataType]: {
             ...state[action.dataType],
-            isLoading: false,
             data: action.payload
           },
+          isLoading: false,
         };
       case LOADED_FAIL:
         return {
           ...state,
           [action.dataType]: {
             ...state[action.dataType],
-            isLoading: false,
             data: [],
           },
+          isLoading: false,
         };
       case CLEAR_ALL:
         return {initialState};

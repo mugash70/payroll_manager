@@ -1,100 +1,104 @@
-import React from 'react';
-import { Table } from 'antd';
+import React, { useEffect,useState } from 'react';
+import { Table,Button,Row,Col} from 'antd';
 import Layoutx  from '../../default/layout';
 import {post_data,get_data,update_data,del_data} from '../../../actions/all'
+import Dept from '../../home/input/departments'
+import Spinner from '../../default/spinner';
+import Confrim from '../../default/confrim'
+import { useDispatch,useSelector  } from 'react-redux';
 
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    filters: [
-      {
-        text: 'Joe',
-        value: 'Joe',
-      },
-      {
-        text: 'Jim',
-        value: 'Jim',
-      },
-      {
-        text: 'Submenu',
-        value: 'Submenu',
-        children: [
-          {
-            text: 'Green',
-            value: 'Green',
-          },
-          {
-            text: 'Black',
-            value: 'Black',
-          },
-        ],
-      }, ],
-    onFilter: (value, record) => record.name.indexOf(value) === 0,
-    sorter: (a, b) => a.name.length - b.name.length,
-    sortDirections: ['descend'],
-  },
-  {
-    title: 'Grade',
-    dataIndex: 'grade',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
-  },
-  {
-    title: 'Age',
-    dataIndex: 'age',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
-  },
-  {
-    title: 'Salary',
-    dataIndex: 'salary',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address',
-    filters: [{text: 'London',value: 'London',},{text: 'New York',value: 'New York',},],
-    onFilter: (value, record) => record.address.indexOf(value) === 0,
-  },
-  {
-    title: 'Department',
-    dataIndex: 'department',
-    filters: [{text: 'London',value: 'London',},{text: 'New York',value: 'New York',},],
-    onFilter: (value, record) => record.address.indexOf(value) === 0,
-  },
-];
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sydney No. 1 Lake Park',
-  },
-  {
-    key: '4',
-    name: 'Jim Red',
-    age: 32,
-    address: 'London No. 2 Lake Park',
-  },
-];
+const breadcrumbs = ['dashboard','departments'];
 
-const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};
+const Deptdash = () => {
+  const [reloadKey, setReloadKey] = useState(0);
 
-const breadcrumbs = ['dashboard','employee'];
-const Employeedash = () => <Table columns={columns} dataSource={data} onChange={onChange} />;
-const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Employeedash} />;
+  const handleReload = () => {
+    setReloadKey(prevKey => prevKey + 1);
+  };
+
+
+const handleDel= async (dept_id)=>{
+
+  try {
+    await del_data(`/entity/ent/departments/${dept_id}`, 'departments')(dispatch);   
+  } catch (err) {
+    console.error(err);
+  }finally{
+  
+    handleReload()
+  
+  }
+}
+const dispatch = useDispatch()
+const departmentData = useSelector((state) =>  state.all.departments.data);
+const isLoading = useSelector((state) =>  state.all.isLoading);
+const error = useSelector((state) => state.error.id);
+
+  const columns = [
+    {
+      title: 'No.',
+      dataIndex: 'dept_id',
+      defaultSortOrder: 'descend',
+      sorter: (a, b) => a.dept_id - b.dept_id,
+      width: '20%',
+    },
+    {
+      title: 'Name',
+      dataIndex: 'dept_name',
+      onFilter: (value, record) => record.dept_name.indexOf(value) === 0,
+      sorter: (a, b) => a.dept_name.length - b.dept_name.length,
+      sortDirections: ['descend'],
+      width: '40%',
+    },
+    {title: 'Action',
+    width: '40%',
+    render: (text, record) => (
+      <div style={{ marginLeft: 'auto' }}>
+        <Row gutter={[20]}>
+          <Col>
+          {<Dept  key={record.dept_id} record={record} type="update"/>}
+          </Col>
+          <Col>
+          {/* DISPLAY EMPLOYEES */}
+          <Button type="secondary"  onClick={()=>{console.log(record.dept_id)}} >Employees</Button>
+          </Col>
+          <Col>      
+          {<Confrim  msg ={'Are sure you want ot delete the Department ?'}
+           handleDelete={() => handleDel(record.dept_id)} 
+          />}
+            </Col>
+        </Row>
+        </div>
+    ),
+  },
+
+  ];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await get_data('/entity/ent/departments', 'departments')(dispatch); 
+        handleReload()  
+      } catch (err) {
+        console.error(err);
+      }finally{
+        handleReload();
+      }
+    };
+    fetchData();
+  }, [dispatch,reloadKey]);
+
+  
+  const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};
+  
+ 
+
+  if (isLoading){
+    return <Spinner/>
+ }else{
+     return(<Table columns={columns} dataSource={departmentData} onChange={onChange} />)
+ }
+}
+
+const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Deptdash} Buttons={Dept}/>;
 export default Home;

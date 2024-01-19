@@ -15,6 +15,14 @@ const authRoutes = require("./routes/auth");
 const OrgRoutes = require("./routes/organization");
 const uploadpic = require("./routes/configs/logoUpload")
 const EmpRoute = require("./routes/employees")
+const EntRoute = require("./routes/entity")
+
+const GrRoute = require("./routes/grades")
+const RoleRoute = require("./routes/role")
+const ReportsRoute = require("./routes/report")
+const BDRoute = require("./routes/employees")
+
+// const EmpRoute = require("./routes/employees")
 //middleware
 app.use(cors());
 
@@ -35,6 +43,8 @@ app.use('/user', authRoutes);
 app.use('/organization', OrgRoutes);
 app.use('/upload', uploadpic);
 app.use('/employees', EmpRoute);
+app.use('/entity', EntRoute);
+app.use('/grades', GrRoute);
 
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 if (process.env.NODE_ENV === 'production') {

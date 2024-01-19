@@ -1,93 +1,118 @@
 import React from 'react';
-import { Table } from 'antd';
+import { Card, Col,Row } from 'antd';
 import Layoutx  from '../default/layout';
-
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    filters: [
-      {
-        text: 'Joe',
-        value: 'Joe',
-      },
-      {
-        text: 'Jim',
-        value: 'Jim',
-      },
-      {
-        text: 'Submenu',
-        value: 'Submenu',
-        children: [
-          {
-            text: 'Green',
-            value: 'Green',
-          },
-          {
-            text: 'Black',
-            value: 'Black',
-          },
-        ],
-      },
-    ],
-    onFilter: (value, record) => record.name.indexOf(value) === 0,
-    sorter: (a, b) => a.name.length - b.name.length,
-    sortDirections: ['descend'],
-  },
-  {
-    title: 'Age',
-    dataIndex: 'age',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address',
-    filters: [
-      {
-        text: 'London',
-        value: 'London',
-      },
-      {
-        text: 'New York',
-        value: 'New York',
-      },
-    ],
-    onFilter: (value, record) => record.address.indexOf(value) === 0,
-  },
-];
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sydney No. 1 Lake Park',
-  },
-  {
-    key: '4',
-    name: 'Jim Red',
-    age: 32,
-    address: 'London No. 2 Lake Park',
-  },
-];
-
-const onChange = (pagination, filters, sorter, extra) => {
-  console.log('params', pagination, filters, sorter, extra);
+import { Link } from 'react-router-dom';
+import { TeamOutlined,FolderViewOutlined,HomeOutlined,DeploymentUnitOutlined,DollarOutlined,HourglassOutlined } from '@ant-design/icons';
+const breadcrumbs = ['dashboard'];
+const gridStyle = {
+  width: '25%',
+  textAlign: 'center',
 };
 
-const breadcrumbs = ['dashboard','user','item'];
-const Tabledash = () => <Table columns={columns} dataSource={data} onChange={onChange} />;
-const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Tabledash} />;
+const Homedash = () => {
+
+return(
+<div style={{minHeight: 380,}}>
+
+<Col>
+      <Row gutter={16}>
+        <Col span={6}>
+        <Link to="/employees">
+   
+          <Card hoverable bordered={false} style={{ width: '100%', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)', marginBottom: '16px' }}>
+            <Row align="middle">
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <h3>Employees</h3>
+              </Col>
+              <Col xs={24} sm={12} md={16} lg={18} xl={20} style={{ textAlign: 'right' }}>
+                <TeamOutlined style={{ fontSize: '30px', color: '#08c' }} />
+              </Col>
+            </Row>
+          </Card>
+          </Link>
+        </Col>
+
+        <Col span={6}>
+        <Link to="/roles">
+          <Card  hoverable bordered={false} style={{ width: '100%', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)', marginBottom: '16px' }}>
+
+          <Row align="middle">
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <h3>Roles/Grades</h3>
+              </Col>
+              <Col xs={24} sm={12} md={16} lg={18} xl={20} style={{ textAlign: 'right' }}>
+                <DeploymentUnitOutlined  style={{ fontSize: '30px', color: '#08c' }} />
+              </Col>
+            </Row>
+          </Card>
+          </Link>
+       </Col>
+       <Col span={6}>
+        <Link to="/departments">
+          <Card  hoverable bordered={false} style={{ width: '100%', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)', marginBottom: '16px' }}>
+          <Row align="middle">
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <h3>Departments</h3>
+              </Col>
+              <Col xs={24} sm={12} md={16} lg={18} xl={20} style={{ textAlign: 'right' }}>
+                <HomeOutlined style={{ fontSize: '30px', color: '#08c' }} />
+              </Col>
+            </Row>
+          </Card>
+         
+          </Link>
+       </Col>
+        <Col span={6}>
+        <Link to="/b&d">
+          <Card hoverable bordered={false} style={{ width: '100%', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)', marginBottom: '16px' }}>
+          <Row align="middle">
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <h3>Bonuses/Deductions</h3>
+              </Col>
+              <Col xs={24} sm={12} md={16} lg={18} xl={20} style={{ textAlign: 'right' }}>
+                <DollarOutlined  style={{ fontSize: '30px', color: '#08c' }} />
+              </Col>
+            </Row>
+          </Card>
+          </Link>
+       </Col>
+        {/* <Col span={6}>
+        <Link to="/others">
+          <Card  hoverable bordered={false} style={{ width: '100%', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)', marginBottom: '16px' }}>
+          <Row align="middle">
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <h3>Others</h3>
+              </Col>
+              <Col xs={24} sm={12} md={16} lg={18} xl={20} style={{ textAlign: 'right' }}>
+                <HourglassOutlined  style={{ fontSize: '30px', color: '#08c' }} />
+              </Col>
+            </Row>
+          </Card>
+          </Link>
+       </Col>
+        <Col span={6}>
+        <Link to="/reports">
+          <Card hoverable bordered={false} style={{ width: '100%', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.5)', marginBottom: '16px' }}>
+          <Row align="middle">
+              <Col xs={24} sm={12} md={8} lg={6} xl={4}>
+                <h3>Reports</h3>
+              </Col>
+              <Col xs={24} sm={12} md={16} lg={18} xl={20} style={{ textAlign: 'right' }}>
+                <FolderViewOutlined  style={{ fontSize: '30px', color: '#08c' }} />
+              </Col>
+            </Row>
+          </Card>
+          </Link>
+       </Col> */}
+      </Row>
+    </Col>
+
+
+ 
+        </div>
+)
+
+};
+
+const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Homedash} />;
 export default Home;

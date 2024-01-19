@@ -13,6 +13,6 @@ export const USER_LOADING ='USER_LOADING'
 export const CLEAR_AUTH ="CLEAR_AUTH"
 export const CLEAR_ALL="CLEAR_ALL"
 export const AUTH_LOADING="AUTH_LOADING"
-
+export const SET_LOADING='SET_LOADING'
 
  export const BASE_API_URL = 'http://localhost:5000'

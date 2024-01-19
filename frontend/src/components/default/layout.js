@@ -29,10 +29,10 @@ const items = [getItem('Dashboard', '1', <PieChartOutlined />),
           <div  style={{ display: 'flex', alignItems: 'center', margin: '16px 0' }} >
           <Breadcrumb>
               {breadcrumsx.map((item, index) => (
-              <Breadcrumb.Item key={index}>{item}</Breadcrumb.Item>
+              <Breadcrumb.Item key={index} ><a href={`/${item}`}>{item}</a></Breadcrumb.Item>
               ))}
           </Breadcrumb>
-          <div style={{ marginLeft: 'auto' }}>{Buttons && <Buttons />}</div>
+          <div style={{ marginLeft: 'auto' }}>{Buttons && <Buttons type="create"/>}</div>
           </div>
          
          

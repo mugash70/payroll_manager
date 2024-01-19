@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
       let {org_name,logo,email, phone,ent} = req.body;
         try {  
           await client.query(
-            `INSERT INTO "enitites" (org_name,logo,email, phone,"Has_entity","Organization_id") VALUES($1, $2, $3, $4,$5,$6) RETURNING *`,
+            `INSERT INTO "entities" (org_name,logo,email, phone,"Has_entity","Organization_id") VALUES($1, $2, $3, $4,$5,$6) RETURNING *`,
             [org_name,logo,email, phone,ent,id]
           );
           await client.query('COMMIT');
@@ -35,7 +35,7 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req,res)=>{
   try {
-    await pool.query(`SELECT * from "enitites"`, (err, response) => {
+    await pool.query(`SELECT * from "entities"`, (err, response) => {
       if (err) {
         console.log(err.stack);
       } else {
@@ -55,7 +55,7 @@ router.get('/:id', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const response = await client.query('SELECT * FROM "enitites" WHERE "Organization_id" = $1', [id]);
+    const response = await client.query('SELECT * FROM "entities" WHERE "Organization_id" = $1', [id]);
     const organization = response.rows[0];
     res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
     await client.query('COMMIT');
@@ -100,7 +100,7 @@ router.put('/:id', async (req, res) => {
      updateValues.push(ent);
        updateFields.push('"Has_entity" = $' + updateValues.length);
      }
-    const updateQuery = `UPDATE "enitites" SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
+    const updateQuery = `UPDATE "entities" SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
     const values = updateValues.concat(org_id);
     const response = await client.query(updateQuery, values);
     if (response.rows.length > 0) {
@@ -125,7 +125,7 @@ router.put('/:id', async (req, res) => {
 router.delete("/:id", async (req, res) => {
 
   const query = {
-    text: `DELETE FROM "enitites" WHERE "Organization_id" = $1 RETURNING *`,
+    text: `DELETE FROM "entities" WHERE "Organization_id" = $1 RETURNING *`,
     values: [req.params.id]
   }
 
@@ -138,6 +138,157 @@ router.delete("/:id", async (req, res) => {
     }
   });
 });
+
+
+
+
+
+// Department
+router.post("/ent/departments", async (req, res) => {
+  const client = await pool.connect();
+  try {
+
+    await client.query('BEGIN');
+    var id = generateRandomNumber('D')
+    let {dept_name,ent_id} = req.body;
+      try {  
+        const result = await client.query(
+          `INSERT INTO departments (dept_name, ent_id) VALUES ($1, $2) RETURNING *`,
+          [dept_name, ent_id]
+        );
+        await client.query('COMMIT');
+        // res.json("created successfully!");
+        const insertedData = result.rows[0];
+        res.json(insertedData);
+      } catch (error) {
+        await client.query('ROLLBACK');
+        console.error(error.stack);
+        res.status(500).json("Error occurred while creating!");
+      } finally {
+        client.release();
+      }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json("Error occurred while creating!");
+  }
+})
+
+
+router.get("/ent/departments", async (req,res)=>{
+  try {
+    await pool.query(`SELECT * from departments`, (err, response) => {
+      if (err) {
+        console.log(err.stack);
+      } else {
+        res.status(200).json(response.rows);
+      }
+    });
+  }
+  catch(error) {
+    console.log(error);
+  }
+}  
+)
+
+router.delete("/ent/departments/:id", async (req, res) => {
+  const query = {
+    text: `DELETE FROM departments WHERE "dept_id" = $1 RETURNING *`,
+    values: [req.params.id]
+  }
+
+  // callback
+await pool.query(query, (err, response) => {
+    if (err) {
+      console.log(err.stack)
+    } else {
+      res.status(200).json(response.rows);
+    }
+  });
+});
+
+
+
+
+
+// Deduction
+router.post("/ent/adjustments", async (req, res) => {
+  const client = await pool.connect();
+  try {
+
+    await client.query('BEGIN');
+    var id = generateRandomNumber('D')
+    let {dept_name,ent_id} = req.body;
+      try {  
+        const result = await client.query(
+          `INSERT INTO adjustments (dept_name, ent_id) VALUES ($1, $2) RETURNING *`,
+          [dept_name, ent_id]
+        );
+        await client.query('COMMIT');
+        // res.json("created successfully!");
+        const insertedData = result.rows[0];
+        res.json(insertedData);
+      } catch (error) {
+        await client.query('ROLLBACK');
+        console.error(error.stack);
+        res.status(500).json("Error occurred while creating!");
+      } finally {
+        client.release();
+      }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json("Error occurred while creating!");
+  }
+})
+
+
+router.get("/ent/adjustments", async (req,res)=>{
+  try {
+    await pool.query(`SELECT * from adjustments`, (err, response) => {
+      if (err) {
+        console.log(err.stack);
+      } else {
+        res.status(200).json(response.rows);
+      }
+    });
+  }
+  catch(error) {
+    console.log(error);
+  }
+}  
+)
+
+router.delete("/ent/adjustments/:id", async (req, res) => {
+  const query = {
+    text: `DELETE FROM adjustments WHERE "dept_id" = $1 RETURNING *`,
+    values: [req.params.id]
+  }
+
+  // callback
+await pool.query(query, (err, response) => {
+    if (err) {
+      console.log(err.stack)
+    } else {
+      res.status(200).json(response.rows);
+    }
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 module.exports = router
 

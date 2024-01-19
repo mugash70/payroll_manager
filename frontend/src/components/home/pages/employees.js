@@ -1,45 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { Table } from 'antd';
+import { Table,Button,Row,Col } from 'antd';
 import Layoutx  from '../../default/layout';
 import {post_data,get_data,update_data,del_data} from '../../../actions/all'
 import { useDispatch,useSelector  } from 'react-redux';
 import Spinner from '../../default/spinner';
 import Alert from '../../default/alert'
 import Emp from '../../home/input/employee'
+import Confrim from '../../default/confrim'
+
+
 const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};
 
 const breadcrumbs = ['dashboard','employees'];
 const Employeedash = () => {
+const [reloadKey, setReloadKey] = useState(0);
 
+  const handleReload = () => {
+    setReloadKey(prevKey => prevKey + 1);
+  };
     const columns = [
         {
-          title: 'Name',
-          dataIndex: 'name',
-          filters: [
-            {
-              text: 'Joe',
-              value: 'Joe',
-            },
-            {
-              text: 'Jim',
-              value: 'Jim',
-            },
-            {
-              text: 'Submenu',
-              value: 'Submenu',
-              children: [
-                {
-                  text: 'Green',
-                  value: 'Green',
-                },
-                {
-                  text: 'Black',
-                  value: 'Black',
-                },
-              ],
-            }, ],
-          onFilter: (value, record) => record.name.indexOf(value) === 0,
-          sorter: (a, b) => a.name.length - b.name.length,
+          title: 'First Name',
+          dataIndex: 'firstname',
+          onFilter: (value, record) => `${record.firstname} ${record.lastname}`.indexOf(value) === 0,
+          sorter: (a, b) => `${a.firstname} ${a.lastname}`.length - `${b.firstname} ${b.lastname}`.length,
+          sortDirections: ['descend'],
+        },
+        {
+          title: 'Other Names',
+          dataIndex: 'lastname',
+          onFilter: (value, record) => `${record.firstname} ${record.lastname}`.indexOf(value) === 0,
+          sorter: (a, b) => `${a.firstname} ${a.lastname}`.length - `${b.firstname} ${b.lastname}`.length,
           sortDirections: ['descend'],
         },
         {
@@ -48,12 +39,6 @@ const Employeedash = () => {
           defaultSortOrder: 'descend',
           sorter: (a, b) => a.age - b.age,
         },
-        // {
-        //   title: 'Age',
-        //   dataIndex: 'age',
-        //   defaultSortOrder: 'descend',
-        //   sorter: (a, b) => a.age - b.age,
-        // },
         {
           title: 'Salary',
           dataIndex: 'salary',
@@ -62,7 +47,7 @@ const Employeedash = () => {
         },
         {
           title: 'Address',
-          dataIndex: 'address',
+          dataIndex: 'address1',
           filters: [{text: 'London',value: 'London',},{text: 'New York',value: 'New York',},],
           onFilter: (value, record) => record.address.indexOf(value) === 0,
         },
@@ -72,28 +57,53 @@ const Employeedash = () => {
           filters: [{text: 'London',value: 'London',},{text: 'New York',value: 'New York',},],
           onFilter: (value, record) => record.address.indexOf(value) === 0,
         },
+        {title: 'Action',
+          render: (text, record) => (
+            <Row gutter={[20]}>
+            <Col>
+            {<Emp  key={record.emp_id} record={record} type="update"/>}
+            </Col>
+       
+            <Col>      
+            {<Confrim  msg ={'Are sure you want ot delete the Employees ?'}
+             handleDelete={() => handleDel(record.emp_id)} 
+            />}
+              </Col>
+          </Row>
+              
+          ),
+        },
       ];
 
-const [employeeData, setEmployeeData] = useState([]);
+const handleDel= async (dept_id)=>{
 
-const data = useSelector((state) => state.all.employees);
+  try {
+    await del_data(`/employees/${dept_id}`, 'employees')(dispatch);   
+  } catch (err) {
+    console.error(err);
+  }finally{
+    handleReload()
+  }
+}
+const employeeData = useSelector((state) =>  state.all.employees.data);
+const isLoading = useSelector((state) =>  state.all.isLoading);
 const error = useSelector((state) => state.error.id);
 
 const dispatch = useDispatch()
+
 useEffect(() => {
     const fetchData = async () => {
       try {
-        await get_data('/employees', 'employees')(dispatch);
+        await get_data('/employees', 'employees')(dispatch);   
       } catch (err) {
         console.error(err);
       }
     };
     fetchData();
-  }, [dispatch]);
+  }, [dispatch,reloadKey]);
 
 
-
-if (data.isLoading){
+if (isLoading){
    return <Spinner/>
 }else{
     return(<Table columns={columns} dataSource={employeeData} onChange={onChange} />)
