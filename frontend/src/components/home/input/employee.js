@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import { PlusOutlined } from '@ant-design/icons';
+import { useDispatch,useSelector  } from 'react-redux';
 import { Button, Modal,
     Divider,
     Cascader,
@@ -20,7 +21,7 @@ import { Button, Modal,
     Upload, } from 'antd';
 import axios from 'axios';
 import {BASE_API_URL} from '../../../actions/types'
-import {post_data} from '../../../actions/all'
+import {post_data,handleUpload} from '../../../actions/all'
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 const normFile = (e) => {
@@ -53,27 +54,30 @@ const Employee = () => {
 
     const grade = gradeData.find(grade => grade.grade_id === selectedGradeId);
     setSelectedGrade(grade);
-    setUserData({ ...userData, grade: grade.grade_name, grade_id: grade.grade_id, jobs: '',salary: grade.salary });
-  };
 
+    setUserData({ ...userData, grade: grade.grade_id, grade_id: grade.grade_id, jobs: '',salary: grade.salary });
+  };
   const handleContractChange = (event) => {
   
     setUserData({ ...userData, contracttype: event });
   };
   const [userData, setUserData] = useState({
-    Fnames:'',
-    address1:'',
-    address2:'',
-    NID:'',
-    grade:'',
-    salary:'',
-    phone:'',
-    email:'',
-    nssf:'',
-    nhif:'',
-    pin:'',
-    pic_url:'',
-    contracttype:''
+    // Fnames:'',
+    // Lnames:'',
+    // address1:'',
+    // address2:'',
+    // NID:'',
+    // grade:'',
+    // salary:'',
+    // phone:'',
+    // email:'',
+    // nssf:'',
+    // nhif:'',
+    // pin:'',
+    // pic_url:[],
+    // contracttype:'',
+    // periodf:'',
+    // periodt:'',
   });
     const gradeData = [
       { grade_id: 1, grade_name: 'Grade A' },
@@ -91,56 +95,58 @@ const Employee = () => {
 
 
 
-  const handleUpload = async () => {
-    try {
-      const formData = new FormData();
-      formData.append('pic_url', selectedImage);
-      const response = await axios.post(`${BASE_API_URL}/proupload/upload`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-      return response.data.imageUrl; 
-    } catch (error) {
-      console.error('Error uploading image:', error);
-    }
-  };
-
-  const  handleAddUser = async (event) => {
-
-    const pic_url = await handleUpload();
-
+  const dispatch = useDispatch()
+  const  handleAddUser = async () => {
+   
     const Adddata = {
       ...userData,
-      pic_url: pic_url
+      pic_url: selectedImage 
     };
-  setOpen(false);
-  await post_data(Adddata,'/employee','employees'); 
+  console.log(Adddata);
 
+  await post_data(Adddata,'/employees','employees')(dispatch);
+  setOpen(false);
   }
 
   const handleInputChange = (event) => {
     const { name, value ,files} = event.target;
-    if (name === 'pic_url') {
-      const file = files[0];
-      setSelectedImage(file);
-      setUserData(prevFormData => ({
-        ...prevFormData,
-        [name]: file
-      }));
-    } else {
       setUserData(prevFormData => ({
         ...prevFormData,
         [name]: value
+      })); };
+
+  const handleInputChangedate = (name, value) => {
+    if (name === 'periodf' || name === 'periodt') {
+      setUserData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    } else {
+      setUserData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
       }));
     }
-  };
-  const handleOk = async(e) => {
-    // console.log(e);
-    form
-      .validateFields()
-      .then(() => {
-        form.submit();
-      })
-      .catch((errorInfo) => {
-        console.error('Form validation failed:', errorInfo);
-      });
+    };
+
+  const handleInputChangefile =  async  (info) => {
+
+    if (info.file.status == 'done') {
+      const { name, value } = info.file.response; 
+      setSelectedImage(info.file.response.imageUrls.map(image => image.url));
+      setUserData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    } else if (info.file.status =='removed') {
+      var x = info.file.response.imageUrls.map(image => image.filen)
+      await axios.delete(`${BASE_API_URL}/upload/${x}`);
+      
+      setUserData((prevFormData) => ({
+        ...prevFormData,
+        pic_url: null, 
+      }));
+    }
   };
   const handlejobChange = (event) => {
     const selectedPay = event.target.value;
@@ -151,7 +157,6 @@ const Employee = () => {
     setUserData({ ...userData, payment: value });
   };
   const handleCancel = (e) => {
-    console.log(e);
     setOpen(false);
   };
   const onStart = (_event, uiData) => {
@@ -169,6 +174,7 @@ const Employee = () => {
   };
   const [form] = Form.useForm();
   const [formData, setFormData] = useState(null);
+  
   const onFinish = (values) => {
     console.log('Form input data:', values); // Log form input data
     try {
@@ -179,16 +185,7 @@ const Employee = () => {
       // ...
     }
   };
-  const handleSubmit = async () => {
-    // try {
-    //   const response = await axios.post('your_api_endpoint', formData);
-    //   console.log('Server response:', response.data);
-    //   message.success('Form submitted successfully!');
-    // } catch (error) {
-    //   console.error('Error submitting form:', error);
-    //   message.error('Failed to submit form. Please try again.');
-    // }
-  };
+
 
   const renderBankDetails = () => {
     if (userData.payment == 'bank') {
@@ -252,12 +249,12 @@ const Employee = () => {
         <Row>
         <Col span={12}>
       
-        <Form.Item label="Full names"
+        <Form.Item label="First names"
         name="Fnames"
         rules={[
           {
             required: true,
-            message: 'Please input the Full Names!',
+            message: 'Please input the Last Names!',
           },]}>
              <Input
               name="Fnames"
@@ -276,14 +273,8 @@ const Employee = () => {
             value={userData.address2}
             onChange={handleInputChange}  />
         </Form.Item>
-        {/* <Form.Item label="Contract type">
-             <Input
-              name="taxpin"
-              value={userData.taxpin}
-              onChange={handleInputChange} 
-          />
-        </Form.Item> */}
-        <Form.Item label="ID/Passport"  name="NID"
+
+        <Form.Item label="ID/Passport"
           rules={[
             {
               required: true,
@@ -306,7 +297,7 @@ const Employee = () => {
          ]}>
          
           <Select
-              defaultValue={gradeData.length > 0 ? gradeData[0].grade_id : ''}
+              initialValues={gradeData.length > 0 ? gradeData[0].grade_id : ''}
               onChange={handleGradeChange}
             >
               {gradeData.map(grade => (
@@ -329,30 +320,32 @@ const Employee = () => {
             ))}
           </Select>
         </Form.Item> */}
-        <Form.Item label="Contract type" name="contracttype">
+        <Form.Item label="Contract type" >
+    
               <Select 
-              defaultValue="2"
-              name="contracttype"
-              onChange={handleContractChange} 
-              value={userData.contracttype}
+                initialValue="2"
+                name="contracttype"
+                onChange={handleContractChange} 
+                value={userData.contracttype}
               >
                 <Select.Option value="1">Contract</Select.Option>
                 <Select.Option value="2">Permanent and Pensionable</Select.Option>
               </Select>
       </Form.Item>
+      
         <Form.Item label="Payment" name="payment">
           <Select
-          defaultValue="cash"
+          initialValues="cash"
           value={userData.payment}
           onChange={handlePayChange}
           >
-            <Select.Option value="mpesa">Mpesa</Select.Option>
-            <Select.Option value="bank">Bank</Select.Option>
-            <Select.Option value="cash">Cash</Select.Option>
+            <Select.Option value="1">Mpesa</Select.Option>
+            <Select.Option value="2">Bank</Select.Option>
+            <Select.Option value="3">Cash</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item label="Salary" name="salary">
-          <InputNumber
+          <Input
           name="salary"
           value={userData.salary}
           onChange={handleInputChange} 
@@ -363,15 +356,35 @@ const Employee = () => {
 
         <Col span={12}>
 
-    
-         <Form.Item
-        label="Period"
-        name="period"
-   
-      >
-        {() => {return userData.contracttype == '2' ? (<DatePicker />) : (<RangePicker />);}}
-
+        <Form.Item label="Last names"
+        name="Lnames"
+        rules={[
+          {
+            required: true,
+            message: 'Please input the Last Names!',
+          },]}>
+             <Input
+              name="Lnames"
+              value={userData.Fnames}
+              onChange={handleInputChange} 
+          />
+        </Form.Item>
+      <Form.Item
+        label="Period From"
+        name="periodf"
+        value={userData.periodf}>
+       <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodf', dateString)} />
       </Form.Item>
+      <Form.Item
+        label="Period To"
+        name="periodt" 
+        value={userData.periodt}>
+        <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodt', dateString)} />;
+      </Form.Item>
+    
+
+
+
     
         <Form.Item label="Phone"
          name="phone"
@@ -415,14 +428,23 @@ const Employee = () => {
               onChange={handleInputChange} 
           />
         </Form.Item>
-        {/* <Form.Item label="TextArea">
-          <TextArea rows={4} />
-        </Form.Item> */}
+    
     
 
 
-        <Form.Item label="Upload" valuePropName="fileList" getValueFromEvent={normFile} name="pic_url">
-          <Upload action="/upload.do" listType="picture-card">
+        <Form.Item label="Upload" 
+        valuePropName="fileList" 
+        getValueFromEvent={normFile}
+        // name="pic_url"
+         >
+          <Upload 
+                  listType="picture-card" 
+                  className="avatar-uploader"
+                  name="pic_url"
+                  accept="image/*"
+                  action={`${BASE_API_URL}/upload`} 
+                  onChange={handleInputChangefile}
+                  >
             <button
               style={{
                 border: 0,
@@ -430,7 +452,7 @@ const Employee = () => {
               }}
               type="button"
             >
-              <PlusOutlined />
+              {/* <PlusOutlined /> */}
               <div
                 style={{
                   marginTop: 8,

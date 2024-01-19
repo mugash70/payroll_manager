@@ -9,6 +9,7 @@ const cors = require("cors");
 const path = require("path");
 const session=require('express-session')
 const cookieP=require('cookie-parser')
+
 //route 
 const authRoutes = require("./routes/auth");
 const OrgRoutes = require("./routes/organization");
@@ -32,7 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use('/user', authRoutes);
 app.use('/organization', OrgRoutes);
-app.use('logoupload', uploadpic);
+app.use('/upload', uploadpic);
 app.use('/employees', EmpRoute);
 
 app.use(express.static(path.join(__dirname, 'frontend/build')));

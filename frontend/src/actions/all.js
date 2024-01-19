@@ -2,14 +2,31 @@ import { findErrors } from './error'
 import axios from 'axios';
 import {LOADED_FAIL,LOADED,BASE_API_URL} from './types'
 
-export const post_data = (postdata,path,types) => async(dispatch) => {
-  console.log(postdata,path,types);  
+
+export const handleUpload = async (selectedImage) => {;
+  try {
+    const formData = new FormData();
+    formData.append('pic_url', selectedImage);
+    const response = await axios.post(`${BASE_API_URL}/upload`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return response.data.imageUrl; 
+  } catch (error) {
+    console.error('Error uploading image:', error);
+  }
+};
+
+
+export const post_data = (postdata,path,types) => async dispatch => {
+  
   const config = { headers: { "Content-type": "application/json" } };
     const body = JSON.stringify(postdata);
     await axios.post(`${BASE_API_URL}${path}`, body, config)
       .then((res) => {dispatch({ type: LOADED, payload: res.data, dataType: types });})
       .catch((err) => {dispatch(findErrors(err.data, err.status, 'LOADED_FAIL'));dispatch({ type: LOADED_FAIL });});
   };
+
+
+
+
   export const get_data = (path,types) =>async dispatch => {
  
     await  axios.get(`${BASE_API_URL}${path}`)

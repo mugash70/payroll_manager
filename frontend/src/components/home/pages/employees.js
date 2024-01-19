@@ -48,12 +48,12 @@ const Employeedash = () => {
           defaultSortOrder: 'descend',
           sorter: (a, b) => a.age - b.age,
         },
-        {
-          title: 'Age',
-          dataIndex: 'age',
-          defaultSortOrder: 'descend',
-          sorter: (a, b) => a.age - b.age,
-        },
+        // {
+        //   title: 'Age',
+        //   dataIndex: 'age',
+        //   defaultSortOrder: 'descend',
+        //   sorter: (a, b) => a.age - b.age,
+        // },
         {
           title: 'Salary',
           dataIndex: 'salary',

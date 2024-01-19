@@ -10,24 +10,96 @@ router.post("/", async (req, res) => {
     try {
 
       await client.query('BEGIN');
-      var id = generateRandomNumber('O')
-      let {org_name,logo,email, phone,ent} = req.body;
+      var id = generateRandomNumber('E')
+      let {
+        Fnames,
+        Lnames,
+        NID,
+        pic_url,
+        address1,
+        address2,
+        grade,
+        grade_id,
+        salary,
+        phone,
+        nhif,
+        nssf,
+        pin,
+        email,
+        periodf,
+        periodt,
+        payment,
+        bankaccountno,
+        dept_id,
+        ent_id,
+        account_type,
+        bankbranch,
+        bankname,
+        contracttype,
+      } = req.body;
         try {  
           await client.query(
-            `INSERT INTO "employees" (org_name,logo,email, phone,"Has_entity","Organization_id") VALUES($1, $2, $3, $4,$5,$6) RETURNING *`,
-            [org_name,logo,email, phone,ent,id]
+            `INSERT INTO employees ( 
+              firstname,
+              lastname,
+              "ID",
+              pic_link,
+              address1,
+              address2,
+              grade_id,
+              salary,
+              phone,
+              nhif,
+              nssf,
+              pin,
+              email,
+              period_from,
+              period_to,
+              pay_id,
+              account_no,
+              dept_id,
+              ent_id,
+              account_type,
+              bank_branch,
+              bank_name,
+              contract) VALUES($1, $2, $3, $4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23) RETURNING *`,
+            [
+              Fnames,
+              Lnames,
+              NID,
+              pic_url,
+              address1,
+              address2,
+              grade_id,
+              salary,
+              phone,
+              nhif,
+              nssf,
+              pin,
+              email,
+              periodf,
+              periodt,
+              payment,
+              bankaccountno,
+              dept_id,
+              ent_id,
+              account_type,
+              bankbranch,
+              bankname,
+              contracttype,
+              ]
           );
           await client.query('COMMIT');
           res.json("created successfully!");
         } catch (error) {
           await client.query('ROLLBACK');
-          console.error(error.message);
+          console.error(error.stack);
           res.status(500).json("Error occurred while creating!");
         } finally {
           client.release();
         }
     } catch (err) {
-      console.error(err.message);
+      console.error(err.stack);
       res.status(500).json("Error occurred while creating!");
     }
   })
