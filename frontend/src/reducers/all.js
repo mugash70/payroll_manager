@@ -1,9 +1,9 @@
-import {LOADED,LOADED_FAIL,CLEAR_ALL,SET_LOADING} from '../actions/types'
+import {LOADED,LOADED_FAIL,CLEAR_ALL,SET_LOADING,UPDATED,ADDED,DELETED} from '../actions/types'
 
 
 var initialState = {
     isLoading: true,
-    bonusdeductions:[],
+    adjustments:[],
     organizations:[],
     entities:[],
     departments:[],
@@ -29,6 +29,37 @@ export default function Allreducer(state = initialState, action) {
           },
           isLoading: false,
         };
+      case DELETED:
+        const deletedItemId = action.payload;
+        const updatedDataAfterDelete = state[action.dataType].data.filter(item => item.id !== deletedItemId);
+        return {
+          ...state,
+          [action.dataType]: {
+            ...state[action.dataType],
+            data: updatedDataAfterDelete,
+          },
+        };
+      case ADDED:
+        const addedItem = action.payload;
+        return {
+          ...state,
+          [action.dataType]: {
+            ...state[action.dataType],
+            data: [...state[action.dataType].data, addedItem],
+          },
+        };
+
+      case UPDATED:
+        const updatedItem = action.payload;
+        const updatedData = state[action.dataType].data.map(item => (item.id === updatedItem.id ? updatedItem : item));
+        return {
+          ...state,
+          [action.dataType]: {
+            ...state[action.dataType],
+            data: updatedData,
+          },
+        };
+
       case LOADED_FAIL:
         return {
           ...state,

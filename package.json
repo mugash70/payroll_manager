@@ -5,7 +5,9 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cd frontend && npm start  && nodemon app.js"
+    "startfront":"cd frontend && npm start",
+    "startback":"nodemon app.js",
+    "start": "npm run startfront && npm run startback"
   },
   "author": "cyril Mugada",
   "license": "ISC",

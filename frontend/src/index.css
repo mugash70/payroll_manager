@@ -11,3 +11,13 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+@media screen and (max-width: 767px) {
+  .dashboard-card h3 {
+    display: none;
+  }
+
+  .dashboard-card {
+    height: 100%; 
+    margin-bottom: 100%;
+  }
+}

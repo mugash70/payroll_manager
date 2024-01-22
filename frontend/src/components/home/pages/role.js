@@ -4,7 +4,7 @@ import { Table,Button,Row,Col } from 'antd';
 import Layoutx  from '../../default/layout';
 
 import Grad from '../../home/input/grades'
-
+import {useReloadKey} from '../../default/index'
 import Spinner from '../../default/spinner';
 import Confrim from '../../default/confrim'
 import {post_data,get_data,update_data,del_data} from '../../../actions/all'
@@ -12,11 +12,13 @@ import {post_data,get_data,update_data,del_data} from '../../../actions/all'
 
 const breadcrumbs = ['dashboard','roles'];
 const RoleDash = () =>{
-const [reloadKey, setReloadKey] = useState(0);
+const {reloadKey, handleReload} = useReloadKey();
+const dispatch = useDispatch()
+const gradesData = useSelector((state) =>  state.all.grades.data);
+const isLoading = useSelector((state) =>  state.all.isLoading);
+const error = useSelector((state) => state.error.id);
 
-const handleReload = () => {
-  setReloadKey(prevKey => prevKey + 1);
-};
+
 
 const columns = [
   {
@@ -66,25 +68,22 @@ const columns = [
 },
   
 ];
-const dispatch = useDispatch()
-const gradesData = useSelector((state) =>  state.all.grades.data);
-const isLoading = useSelector((state) =>  state.all.isLoading);
-const error = useSelector((state) => state.error.id);
+
 
 const handleDel= async (grade_id)=>{ ;try { await del_data(`/grades/${grade_id}`, 'grades')(dispatch); } catch (err) {console.error(err);}finally{ handleReload()}}
 
 useEffect(() => {
+
   const fetchData = async () => {
     try {
-      await get_data('/grades', 'grades')(dispatch); 
-      handleReload()  
+      await get_data('/grades', 'grades')(dispatch);   
     } catch (err) {
       console.error(err);
-    }finally{
-      handleReload();
     }
   };
+  if (reloadKey != 0) {
   fetchData();
+  }
 }, [dispatch,reloadKey]);
 
 const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};

@@ -11,7 +11,7 @@ router.post("/", async (req, res) => {
 
       await client.query('BEGIN');
       var id = generateRandomNumber('D')
-      console.log(req.body);
+ 
       let {grade_name,salary,payment_period, phone,ent} = req.body;
         try {  
          const result = await client.query(

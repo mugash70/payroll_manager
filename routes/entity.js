@@ -175,6 +175,7 @@ router.post("/ent/departments", async (req, res) => {
 
 
 router.get("/ent/departments", async (req,res)=>{
+
   try {
     await pool.query(`SELECT * from departments`, (err, response) => {
       if (err) {
@@ -216,13 +217,16 @@ router.post("/ent/adjustments", async (req, res) => {
   try {
 
     await client.query('BEGIN');
-    var id = generateRandomNumber('D')
-    let {dept_name,ent_id} = req.body;
+    var id = generateRandomNumber('BD')
+    let {adj_name,adjust_type,amount,amount_type,payment_period,xfrom,xto} = req.body;
+
       try {  
         const result = await client.query(
-          `INSERT INTO adjustments (dept_name, ent_id) VALUES ($1, $2) RETURNING *`,
-          [dept_name, ent_id]
+          `INSERT INTO adjustments (adj_name, adj_type, amount, amount_type, period, "from", "to") 
+           VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+          [adj_name, adjust_type, amount, amount_type, payment_period, xfrom, xto]
         );
+        
         await client.query('COMMIT');
         // res.json("created successfully!");
         const insertedData = result.rows[0];
@@ -259,7 +263,7 @@ router.get("/ent/adjustments", async (req,res)=>{
 
 router.delete("/ent/adjustments/:id", async (req, res) => {
   const query = {
-    text: `DELETE FROM adjustments WHERE "dept_id" = $1 RETURNING *`,
+    text: `DELETE FROM adjustments WHERE "adj_id" = $1 RETURNING *`,
     values: [req.params.id]
   }
 

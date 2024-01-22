@@ -6,6 +6,7 @@ import Spinner from '../../default/spinner';
 import { Button, Modal,
     Divider,
     Cascader,
+   
     Checkbox,
     ColorPicker,
     DatePicker,
@@ -23,6 +24,7 @@ import { Button, Modal,
 import axios from 'axios';
 import {BASE_API_URL} from '../../../actions/types'
 import {post_data,handleUpload,setLoading} from '../../../actions/all'
+import {useReloadKey} from '../../default/index'
 const { TextArea } = Input;
 const normFile = (e) => {
     if (Array.isArray(e)) {
@@ -33,6 +35,11 @@ const normFile = (e) => {
 
 
 const Roles = ({ type,record }) => {
+
+  const {reloadKey, handleReload} = useReloadKey();
+  const dispatch = useDispatch()
+  const isLoading = useSelector((state) =>  state.all.isLoading);
+
   const [open, setOpen] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [bounds, setBounds] = useState({
@@ -45,10 +52,7 @@ const Roles = ({ type,record }) => {
  const showModal = () => {
     setOpen(true);
   };
-  const [AdjsData, setAdjsData] = useState({
-    // grade_name:'',
- 
-  });
+  const [AdjsData, setAdjsData] = useState({});
 
     useEffect(() => {
     if (record) {
@@ -61,14 +65,19 @@ const Roles = ({ type,record }) => {
     }
     }, [record]); 
 
-  const dispatch = useDispatch()
-
-  const isLoading = useSelector((state) =>  state.all.isLoading);
 
   const  handleAddRole = async () => {
     dispatch(setLoading(true)); 
-   await post_data(AdjsData,'/grades','grades')(dispatch);
-    setOpen(false);
+    try{
+      await post_data(AdjsData,'/entity/ent/adjustments','adjustments')(dispatch);
+      setAdjsData({});
+      handleReload()
+      setOpen(false);
+      dispatch(setLoading(false)); 
+    }catch(err){
+      console.log(err);
+    }
+   
   }
 
   const handleCancel = (e) => {
@@ -95,13 +104,25 @@ const Roles = ({ type,record }) => {
         [name]: value
       })); };
       
-      const handleInputChange2 = (name,value, option) => {
-        setAdjsData(prevFormData => ({
-          ...prevFormData,
-          option: value
-        }));
-      };
-    
+  const handleInputChange2 = (name, value) => {
+    setAdjsData(prevFormData => ({
+      ...prevFormData,
+      [name]: value
+    }));
+  };
+  const handleInputChangedate = (name, value) => {
+    if (name === 'xto' || name === 'xfrom') {
+      setAdjsData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    } else {
+      setAdjsData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    }
+    };
 
   const onFinish = (values) => {
     console.log('Form input data:', values); // Log form input data
@@ -140,9 +161,7 @@ const Roles = ({ type,record }) => {
           </div>
         }open={open} width={500} onOk={handleAddRole} onCancel={handleCancel} modalRender={(modal) => (
         <Draggable disabled={disabled} bounds={bounds} nodeRef={draggleRef} onStart={(event, uiData) => onStart(event, uiData)}>
-          <div ref={draggleRef}>{modal}
-            {/* {isLoading ? <Spinner /> : modal} */}
-          </div>
+          <div ref={draggleRef}>{modal}</div>
         </Draggable>)}>
         
         
@@ -154,11 +173,11 @@ const Roles = ({ type,record }) => {
   <Col span ={20}>
   <Form.Item label="Adjustment Type">
   <Select
-      name="payment_period"
-      value={AdjsData.payment_period}
-      onChange={handleInputChange}
-    
-    >
+      name="adjust_type"
+      value={AdjsData.adjust_type}
+      // onChange={handleInputChange2}>
+      onChange={(value, option) => handleInputChange2("adjust_type", value)}
+      >
       {adjtypes.map(adjtypes => (
         <Select.Option key={adjtypes} value={adjtypes}>
           {adjtypes}
@@ -166,20 +185,19 @@ const Roles = ({ type,record }) => {
       ))}
     </Select>
         </Form.Item>
- 
   <Form.Item label="Name">
              <Input
               name="adj_name"
-              value={AdjsData.period}
+              value={AdjsData.adj_name}
               onChange={handleInputChange} 
             
           />  </Form.Item>
 
   <Form.Item label="Period" >
     <Select
-      name="period"
+      name="payment_period"
       value={AdjsData.payment_period}
-      onChange={handleInputChange}
+      onChange={(value, option) => handleInputChange2("payment_period", value)}
     
     >
       {periodstypes.map(payment_period => (
@@ -191,12 +209,11 @@ const Roles = ({ type,record }) => {
   </Form.Item>
 
   <Form.Item label="Amount Type" >
-    <Select
-      name="amount_type"
-      value={AdjsData.amount_type}
-      onChange={handleInputChange}
-    
-    >
+  <Select
+    name="amount_type"
+    value={AdjsData.amount_type}
+    onChange={(value, option) => handleInputChange2("amount_type", value)}
+  >
       {amounttypes.map(amount_type => (
         <Select.Option key={amount_type} value={amount_type}>
           {amount_type}
@@ -205,14 +222,43 @@ const Roles = ({ type,record }) => {
     </Select>
   </Form.Item>
 
-  <Form.Item label="Amount" >
-  <Input
-              name="amount"
-              value={AdjsData.amount}
-              onChange={handleInputChange} 
-            
-          /> 
-  </Form.Item>
+  {AdjsData.amount_type == 'percentage' ? (
+    <Form.Item label="Amount" >
+      <Input
+      name="amount"
+        value={AdjsData.amount}
+        onChange={handleInputChange}
+        addonAfter="%"
+      />
+    </Form.Item>
+  ) : (
+    <Form.Item label="Amount" >
+      <Input
+      name="amount"
+        value={AdjsData.amount}
+        onChange={handleInputChange}
+      />
+    </Form.Item>
+  )}
+
+{AdjsData.payment_period == 'temporary' ? (
+
+<Row gutter={10}>
+  <Col span={12}>
+    <Form.Item label="From" name="xfrom">
+      <DatePicker  onChange={(date, dateString) => handleInputChangedate('xfrom', dateString)} />
+    </Form.Item>
+  </Col>
+  <Col span={12}>
+    <Form.Item label="To" name="xto">
+      <DatePicker  onChange={(date, dateString) => handleInputChangedate('xto', dateString)} />
+    </Form.Item>
+  </Col>
+</Row>
+
+
+
+  ) : null}
 </Col>
 </Row>
 </>
@@ -221,11 +267,10 @@ const Roles = ({ type,record }) => {
   <Col span ={20}>
   <Form.Item label="Adjustment Type">
   <Select
-      name="payment_period"
-      value={AdjsData.payment_period}
-      onChange={handleInputChange}
-    
-    >
+      name="adjust_type"
+      value={record.adj_type}
+      onChange={(value, option) => handleInputChange2("adjust_type", value)}
+      >
       {adjtypes.map(adjtypes => (
         <Select.Option key={adjtypes} value={adjtypes}>
           {adjtypes}
@@ -233,11 +278,10 @@ const Roles = ({ type,record }) => {
       ))}
     </Select>
         </Form.Item>
- 
   <Form.Item label="Name">
              <Input
               name="adj_name"
-              value={AdjsData.period}
+              value={record.adj_name}
               onChange={handleInputChange} 
             
           />  </Form.Item>
@@ -245,8 +289,8 @@ const Roles = ({ type,record }) => {
   <Form.Item label="Period" >
     <Select
       name="period"
-      value={AdjsData.payment_period}
-      onChange={handleInputChange}
+      value={record.period}
+      onChange={(value, option) => handleInputChange2("payment_period", value)}
     
     >
       {periodstypes.map(payment_period => (
@@ -258,12 +302,11 @@ const Roles = ({ type,record }) => {
   </Form.Item>
 
   <Form.Item label="Amount Type" >
-    <Select
-      name="amount_type"
-      value={AdjsData.amount_type}
-      onChange={handleInputChange}
-    
-    >
+  <Select
+    name="amount_type"
+    value={record.amount_type}
+    onChange={(value, option) => handleInputChange2("amount_type", value)}
+  >
       {amounttypes.map(amount_type => (
         <Select.Option key={amount_type} value={amount_type}>
           {amount_type}
@@ -272,14 +315,43 @@ const Roles = ({ type,record }) => {
     </Select>
   </Form.Item>
 
-  <Form.Item label="Amount" >
-  <Input
-              name="amount"
-              value={AdjsData.amount}
-              onChange={handleInputChange} 
-            
-          /> 
-  </Form.Item>
+  {record.amount_type == 'percentage' ? (
+    <Form.Item label="Amount" >
+      <Input
+      name="amount"
+        value={record.amount}
+        onChange={handleInputChange}
+        addonAfter="%"
+      />
+    </Form.Item>
+  ) : (
+    <Form.Item label="Amount" >
+      <Input
+      name="amount"
+        value={record.amount}
+        onChange={handleInputChange}
+      />
+    </Form.Item>
+  )}
+
+{record.period == 'temporary' ? (
+
+<Row gutter={10}>
+  <Col span={12}>
+    <Form.Item label="From" name="xfrom">
+      <DatePicker value={record.from}  onChange={(date, dateString) => handleInputChangedate('xfrom', dateString)} />
+    </Form.Item>
+  </Col>
+  <Col span={12}>
+    <Form.Item label="To" name="xto">
+      <DatePicker value={record.to}  onChange={(date, dateString) => handleInputChangedate('xto', dateString)} />
+    </Form.Item>
+  </Col>
+</Row>
+
+
+
+  ) : null}
 </Col>
 </Row>
 

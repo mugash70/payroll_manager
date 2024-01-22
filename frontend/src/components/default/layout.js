@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {DesktopOutlined,FileOutlined,PieChartOutlined,TeamOutlined,UserOutlined,} from '@ant-design/icons';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
+
 const { Header, Content, Footer, Sider } = Layout;
 
 function getItem(label, key, icon, children) {return {key,icon,children,label,};}
@@ -12,8 +13,6 @@ const items = [getItem('Dashboard', '1', <PieChartOutlined />),
 
 
   const Layoutx = ({ breadcrumsx, DashComponent,Buttons}) => {
-
-
   const [collapsed, setCollapsed] = useState(false);
   const {token: { colorBgContainer, borderRadiusLG },} = theme.useToken();
 

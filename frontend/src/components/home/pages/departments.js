@@ -6,30 +6,24 @@ import Dept from '../../home/input/departments'
 import Spinner from '../../default/spinner';
 import Confrim from '../../default/confrim'
 import { useDispatch,useSelector  } from 'react-redux';
-
+import {useReloadKey} from '../../default/index'
 const breadcrumbs = ['dashboard','departments'];
 
 const Deptdash = () => {
-  const [reloadKey, setReloadKey] = useState(0);
-
-  const handleReload = () => {
-    setReloadKey(prevKey => prevKey + 1);
-  };
-
+  const {reloadKey, handleReload} = useReloadKey();
+  const dispatch = useDispatch()
+ 
 
 const handleDel= async (dept_id)=>{
-
   try {
     await del_data(`/entity/ent/departments/${dept_id}`, 'departments')(dispatch);   
+    handleReload()
   } catch (err) {
     console.error(err);
-  }finally{
-  
-    handleReload()
-  
-  }
-}
-const dispatch = useDispatch()
+
+}}
+
+
 const departmentData = useSelector((state) =>  state.all.departments.data);
 const isLoading = useSelector((state) =>  state.all.isLoading);
 const error = useSelector((state) => state.error.id);
@@ -78,14 +72,13 @@ const error = useSelector((state) => state.error.id);
     const fetchData = async () => {
       try {
         await get_data('/entity/ent/departments', 'departments')(dispatch); 
-        handleReload()  
       } catch (err) {
         console.error(err);
-      }finally{
-        handleReload();
       }
     };
-    fetchData();
+    if (reloadKey != 0) {
+      fetchData();
+    }
   }, [dispatch,reloadKey]);
 
   
@@ -99,6 +92,7 @@ const error = useSelector((state) => state.error.id);
      return(<Table columns={columns} dataSource={departmentData} onChange={onChange} />)
  }
 }
+
 
 const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Deptdash} Buttons={Dept}/>;
 export default Home;

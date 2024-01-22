@@ -2,6 +2,7 @@ import React, { useRef, useState,useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { PlusOutlined } from '@ant-design/icons';
 import { useDispatch,useSelector  } from 'react-redux';
+import {useReloadKey} from '../../default/index'
 import { Button, Modal,
     Divider,
     Cascader,
@@ -21,8 +22,8 @@ import { Button, Modal,
     Upload, } from 'antd';
 import axios from 'axios';
 import {BASE_API_URL} from '../../../actions/types'
-import {post_data,handleUpload} from '../../../actions/all'
-const { TextArea } = Input;
+import {post_data} from '../../../actions/all'
+
 const normFile = (e) => {
     if (Array.isArray(e)) {
       return e;
@@ -33,6 +34,10 @@ const normFile = (e) => {
 
 
 const Employee = ({ type,record }) => {
+
+  const gradeData = useSelector((state) => state.all.grades.data);
+  console.log(gradeData);
+  const jobs =useSelector((state) =>  state.all.employees.data);
 
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -57,25 +62,9 @@ const Employee = ({ type,record }) => {
   const handleContractChange = (event) => {
     setUserData({ ...userData, contracttype: event });
   };
-  const [userData, setUserData] = useState({
-    Fnames:'',
-    Lnames:'',
-    address1:'',
-    address2:'',
-    NID:'',
-    grade:'',
-    salary:'',
-    phone:'',
-    email:'',
-    nssf:'',
-    nhif:'',
-    pin:'',
-    pic_url:[],
-    contracttype:'',
-    periodf:'',
-    periodt:'',
-  });
-
+  const [userData, setUserData] = useState({});
+  const {reloadKey, handleReload} = useReloadKey();
+  const dispatch = useDispatch()
 
 useEffect(() => {
   if (record) {
@@ -104,27 +93,9 @@ useEffect(() => {
     });
   }
 }, [record]); 
-if(record){
-  console.log(record);
-}
-
-    const gradeData = [
-      { grade_id: 1, grade_name: 'Grade A' },
-      { grade_id: 2, grade_name: 'Grade B' },
-      { grade_id: 3, grade_name: 'Grade C' },
-      { grade_id: 4, grade_name: 'Grade D' },
-    ];
-    
-    const jobs =[
-      { grade_id: 1, grade_name: 'Grade A' },
-      { grade_id: 2, grade_name: 'Grade B' },
-      { grade_id: 3, grade_name: 'Grade C' },
-      { grade_id: 4, grade_name: 'Grade D' },
-    ]
 
 
 
-  const dispatch = useDispatch()
   const  handleAddUser = async () => {
    
     const Adddata = {
@@ -133,6 +104,7 @@ if(record){
     };
 
   await post_data(Adddata,'/employees','employees')(dispatch);
+  setUserData({})
   setOpen(false);
   }
 
@@ -143,7 +115,7 @@ if(record){
         [name]: value
       })); };
 
-  const handleInputChangedate = (name, value) => {
+   const handleInputChangedate = (name, value) => {
     if (name === 'periodf' || name === 'periodt') {
       setUserData((prevFormData) => ({
         ...prevFormData,
@@ -203,17 +175,18 @@ if(record){
   const [form] = Form.useForm();
   const [formData, setFormData] = useState(null);
   
-  const onFinish = (values) => {
-    console.log('Form input data:', values); // Log form input data
-    try {
-      // Handle form submission logic, e.g., make an API call
-      // ...
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      // ...
-    }
-  };
+  // const onFinish = (values) => {
+  //   console.log('Form input data:', values); // Log form input data
+  //   try {
+  //     // Handle form sumission logic, e.g., make an API call
+  //     // ...
+  //   } catch (error) {
+  //     console.error('Error submitting form:', error);
+  //     // ...
+  //   }
+  // };
 
+  
 
   const renderBankDetails = () => {
     if (userData.payment == '2') {
@@ -261,9 +234,9 @@ if(record){
     {type == 'create' ? (
       <Button onClick={showModal}>Add employees</Button>
     ) : (
-      <Button onClick={showModal} type="primary">View</Button>
+      <Button onClick={showModal} type="primary">Update</Button>
     )}
-      <Modal
+    <Modal
         title={
           <div
             style={{width: '100%',cursor: 'move',}}
@@ -275,9 +248,8 @@ if(record){
             <h3>Add Employee</h3>):(<h3>Update Employee Details</h3>)}
           </div>
         }open={open} width={1000} onOk={handleAddUser} onCancel={handleCancel} modalRender={(modal) => (<Draggable disabled={disabled} bounds={bounds} nodeRef={draggleRef} onStart={(event, uiData) => onStart(event, uiData)}><div ref={draggleRef}>{modal}</div></Draggable>)}>
-        
-        
-        <Form labelCol={{span: 5,}} wrapperCol={{span: 17,}}layout="horizontal" style={{maxWidth:'100%',}} onFinish={onFinish}>
+        <Form labelCol={{span: 5,}} wrapperCol={{span: 17,}}layout="horizontal" style={{maxWidth:'100%',}} >
+        {/* onFinish={onFinish} */}
   
 {type == 'create' ? (
   <Row>
@@ -296,12 +268,12 @@ if(record){
               onChange={handleInputChange} 
           />
         </Form.Item>
-        <Form.Item label="Address 1" name="address1">
+        <Form.Item label="Address 1" >
           <Input   name="address1"
               value={userData.address1}
               onChange={handleInputChange}  />
         </Form.Item>
-        <Form.Item label="Address 2" name="address2">
+        <Form.Item label="Address 2">
           <Input 
             name="address2"
             value={userData.address2}
@@ -321,7 +293,7 @@ if(record){
           />
         </Form.Item>
         <Form.Item label="grade"
-         name="grade"
+      
          rules={[
            {
              required: true,
@@ -330,12 +302,12 @@ if(record){
          ]}>
          
           <Select
-              initialValues={gradeData.length > 0 ? gradeData[0].grade_id : ''}
+             
               onChange={handleGradeChange}
             >
-              {gradeData.map(grade => (
+              {open && gradeData.map(grade => (
                 <Select.Option key={grade.grade_id} value={grade.grade_id}>
-                  {grade.grade_name}
+                 {grade.grade_name}
                 </Select.Option>
               ))}
             </Select>
@@ -354,7 +326,6 @@ if(record){
           </Select>
         </Form.Item> */}
         <Form.Item label="Contract type" >
-    
               <Select 
                 name="contracttype"
                 onChange={handleContractChange} 
@@ -364,9 +335,8 @@ if(record){
                 <Select.Option value="2">Permanent and Pensionable</Select.Option>
               </Select>
       </Form.Item>
-        <Form.Item label="Payment" name="payment">
+        <Form.Item label="Payment" >
           <Select
-          initialValues="cash"
           value={userData.payment}
           onChange={handlePayChange}
           >
@@ -375,7 +345,7 @@ if(record){
             <Select.Option value="3">Cash</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item label="Salary" name="salary">
+        <Form.Item label="Salary" >
           <Input
           name="salary"
           value={userData.salary}
@@ -402,18 +372,18 @@ if(record){
         </Form.Item>
       <Form.Item
         label="Period From"
-        name="periodf"
+  
         value={userData.periodf}>
        <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodf', dateString)} />
       </Form.Item>
       <Form.Item
         label="Period To"
-        name="periodt" 
+    
         value={userData.periodt}>
         <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodt', dateString)} />;
       </Form.Item>
         <Form.Item label="Phone"
-         name="phone"
+    
          onChange={handleInputChange} 
          rules={[
            {
@@ -426,28 +396,28 @@ if(record){
               value={userData.phone}
               onChange={handleInputChange} />
         </Form.Item>
-        <Form.Item label="Email" name="email">
+        <Form.Item label="Email">
              <Input
               name="email"
               value={userData.email}
               onChange={handleInputChange} 
           />
         </Form.Item>
-        <Form.Item label="Nssf" name="nssf">
+        <Form.Item label="Nssf" >
              <Input
               name="nssf"
               value={userData.nssf}
               onChange={handleInputChange} 
           />
         </Form.Item>
-        <Form.Item label="Nhif" name="nhif">
+        <Form.Item label="Nhif" >
              <Input
               name="nhif"
               value={userData.nhif}
               onChange={handleInputChange} 
           />
         </Form.Item>
-        <Form.Item label="Tax pin" name="pin">
+        <Form.Item label="Tax pin" >
           <Input
               name="pin"
               value={userData.pin}
@@ -540,15 +510,14 @@ if(record){
          ]}>
          
           <Select
-              initialValues={gradeData.length > 0 ? gradeData[0].grade_id : ''}
               onChange={handleGradeChange}
               value={userData.grade}
             >
-              {gradeData.map(grade => (
+              {gradeData ? gradeData.map(grade => (
                 <Select.Option key={grade.grade_id} value={grade.grade_id}>
                   {grade.grade_name}
                 </Select.Option>
-              ))}
+              )):null}
             </Select>
 
       </Form.Item>

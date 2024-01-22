@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table,Button,Row,Col } from 'antd';
+import { Table,Button,Row,Col,theme } from 'antd';
 import Layoutx  from '../../default/layout';
 import {post_data,get_data,update_data,del_data} from '../../../actions/all'
 import { useDispatch,useSelector  } from 'react-redux';
@@ -7,17 +7,13 @@ import Spinner from '../../default/spinner';
 import Alert from '../../default/alert'
 import Emp from '../../home/input/employee'
 import Confrim from '../../default/confrim'
-
+import {useReloadKey} from '../../default/index'
 
 const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};
 
 const breadcrumbs = ['dashboard','employees'];
 const Employeedash = () => {
-const [reloadKey, setReloadKey] = useState(0);
-
-  const handleReload = () => {
-    setReloadKey(prevKey => prevKey + 1);
-  };
+  const {reloadKey, handleReload} = useReloadKey();
     const columns = [
         {
           title: 'First Name',
@@ -94,14 +90,18 @@ const dispatch = useDispatch()
 useEffect(() => {
     const fetchData = async () => {
       try {
-        await get_data('/employees', 'employees')(dispatch);   
+        await get_data('/employees', 'employees')(dispatch);
+        await get_data('/grades', 'grades')(dispatch);      
       } catch (err) {
         console.error(err);
       }
     };
-    fetchData();
+    if(reloadKey != 0){fetchData();}
   }, [dispatch,reloadKey]);
 
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
 
 if (isLoading){
    return <Spinner/>

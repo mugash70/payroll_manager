@@ -6,33 +6,24 @@ import Ded from '../../home/input/adjustments'
 import Spinner from '../../default/spinner';
 import Confrim from '../../default/confrim'
 import { useDispatch,useSelector  } from 'react-redux';
-
+import {useReloadKey} from '../../default/index'
 const breadcrumbs = ['dashboard','adjustments'];
 
 const Deddash = () => {
-  const [reloadKey, setReloadKey] = useState(0);
-
-  const handleReload = () => {
-    setReloadKey(prevKey => prevKey + 1);
-  };
-
-
-const handleDel= async (Ded_id)=>{
-
-  try {
-    await del_data(`/entity/ent/adjustments/${Ded_id}`, 'adjustments')(dispatch);   
-  } catch (err) {
-    console.error(err);
-  }finally{
-  
-    handleReload()
-  
-  }
-}
+const {reloadKey, handleReload} = useReloadKey();
 const dispatch = useDispatch()
-const deductionData = useSelector((state) =>  state.all.bonusdeductions.data);
+const deductionData = useSelector((state) =>  state.all.adjustments.data);
 const isLoading = useSelector((state) =>  state.all.isLoading);
 const error = useSelector((state) => state.error.id);
+
+const handleDel= async (adj_id)=>{
+  try {
+    await del_data(`/entity/ent/adjustments/${adj_id}`, 'adjustments')(dispatch);   
+    handleReload()
+  } catch (err) {
+    console.error(err);
+  }
+}
 
   const columns = [
     {
@@ -93,15 +84,11 @@ const error = useSelector((state) => state.error.id);
       <div style={{ marginLeft: 'auto' }}>
         <Row gutter={[20]}>
           <Col>
-          {<Ded  key={record.Ded_id} record={record} type="update"/>}
-          </Col>
-          <Col>
-          {/* DISPLAY EMPLOYEES */}
-          <Button type="secondary"  onClick={()=>{console.log(record.Ded_id)}} >Employees</Button>
+          {<Ded  key={record.adj_id} record={record} type="update"/>}
           </Col>
           <Col>      
           {<Confrim  msg ={'Are sure you want ot delete the Department ?'}
-           handleDelete={() => handleDel(record.Ded_id)} 
+           handleDelete={() => handleDel(record.adj_id)} 
           />}
             </Col>
         </Row>
@@ -115,14 +102,11 @@ const error = useSelector((state) => state.error.id);
     const fetchData = async () => {
       try {
         await get_data('/entity/ent/adjustments', 'adjustments')(dispatch); 
-        handleReload()  
       } catch (err) {
         console.error(err);
-      }finally{
-        handleReload();
       }
     };
-    fetchData();
+    if(reloadKey != 0){fetchData();}
   }, [dispatch,reloadKey]);
 
   

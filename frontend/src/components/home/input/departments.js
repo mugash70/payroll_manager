@@ -21,7 +21,8 @@ import { Button, Modal,
     Upload, } from 'antd';
 import axios from 'axios';
 import {BASE_API_URL} from '../../../actions/types'
-import {post_data,handleUpload} from '../../../actions/all'
+import {post_data} from '../../../actions/all'
+import {useReloadKey} from '../../default/index'; 
 const { TextArea } = Input;
 const normFile = (e) => {
     if (Array.isArray(e)) {
@@ -41,6 +42,9 @@ const Departments = ({ type,record }) => {
     right: 0,
   });
   const draggleRef = useRef(null);
+
+  const { reloadKey, handleReload } = useReloadKey();
+
  const showModal = () => {
     setOpen(true);
   };
@@ -52,17 +56,20 @@ const Departments = ({ type,record }) => {
     useEffect(() => {
     if (record) {
         setdeptData({
-            dept_name: record.firstname,
-
-        });
+            dept_name: record.firstname});
     }
     }, [record]); 
 
   const dispatch = useDispatch()
-  const  handleAddUser = async () => {
-  await post_data(deptData,'/entity/ent/departments','Departmentss')(dispatch);
-  setOpen(false);
-  }
+  const  handleAddDept = async () => {
+    try {
+      await post_data(deptData,'/entity/ent/departments','departments')(dispatch);
+      setOpen(false);
+      setdeptData({})
+      handleReload()
+    } catch (err) {
+      console.error(err);
+    }}
 
   const handleCancel = (e) => {
     setOpen(false);
@@ -105,7 +112,7 @@ const Departments = ({ type,record }) => {
     {type == 'create' ? (
       <Button onClick={showModal}>Add Departments</Button>
     ) : (
-      <Button onClick={showModal} type="primary">View</Button>
+      <Button onClick={showModal} type="primary">update</Button>
     )}
       <Modal
         title={
@@ -118,7 +125,7 @@ const Departments = ({ type,record }) => {
             {type == 'create' ? (
             <h3>Add Departments</h3>):(<h3>Update Departments Details</h3>)}
           </div>
-        }open={open} width={500} onOk={handleAddUser} onCancel={handleCancel} modalRender={(modal) => (<Draggable disabled={disabled} bounds={bounds} nodeRef={draggleRef} onStart={(event, uiData) => onStart(event, uiData)}><div ref={draggleRef}>{modal}</div></Draggable>)}>
+        }open={open} width={500} onOk={handleAddDept} onCancel={handleCancel} modalRender={(modal) => (<Draggable disabled={disabled} bounds={bounds} nodeRef={draggleRef} onStart={(event, uiData) => onStart(event, uiData)}><div ref={draggleRef}>{modal}</div></Draggable>)}>
         
         
         <Form labelCol={{span: 8,}} wrapperCol={{span: 17,}}layout="horizontal" style={{maxWidth:'100%',}} onFinish={onFinish}>
@@ -138,7 +145,7 @@ const Departments = ({ type,record }) => {
     <Form.Item label="Department names">
     <Input
      name="dept_name"
-     value={deptData.dept_name}
+     value={record.dept_name}
      onChange={handleInputChange} 
      />
     </Form.Item>

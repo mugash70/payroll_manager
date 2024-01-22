@@ -23,6 +23,7 @@ import { Button, Modal,
 import axios from 'axios';
 import {BASE_API_URL} from '../../../actions/types'
 import {post_data,handleUpload,setLoading} from '../../../actions/all'
+import {useReloadKey} from '../../default/index'; 
 const { TextArea } = Input;
 const normFile = (e) => {
     if (Array.isArray(e)) {
@@ -33,6 +34,7 @@ const normFile = (e) => {
 
 
 const Roles = ({ type,record }) => {
+  const { reloadKey, handleReload } = useReloadKey();
   const [open, setOpen] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [bounds, setBounds] = useState({
@@ -66,9 +68,15 @@ const Roles = ({ type,record }) => {
   const isLoading = useSelector((state) =>  state.all.isLoading);
 
   const  handleAddRole = async () => {
-    dispatch(setLoading(true)); 
-   await post_data(gradeData,'/grades','grades')(dispatch);
-    setOpen(false);
+    // dispatch(setLoading(true)); 
+    try{
+      await post_data(gradeData,'/grades','grades')(dispatch);
+      handleReload() 
+      setOpen(false);
+    }catch(err){
+        console.log(err);
+    }
+    
   }
 
   const handleCancel = (e) => {
