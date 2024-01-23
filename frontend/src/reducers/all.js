@@ -51,7 +51,7 @@ export default function Allreducer(state = initialState, action) {
 
       case UPDATED:
         const updatedItem = action.payload;
-        const updatedData = state[action.dataType].data.map(item => (item.id === updatedItem.id ? updatedItem : item));
+        const updatedData = state[action.dataType].data.map(item =>item.emp_id === updatedItem.emp_id ? { ...item, ...updatedItem } : item);
         return {
           ...state,
           [action.dataType]: {
@@ -59,7 +59,7 @@ export default function Allreducer(state = initialState, action) {
             data: updatedData,
           },
         };
-
+      
       case LOADED_FAIL:
         return {
           ...state,

@@ -38,7 +38,7 @@ router.post("/", async (req, res) => {
         contracttype,
       } = req.body;
         try {  
-          await client.query(
+          const response = await client.query(
             `INSERT INTO employees ( 
               firstname,
               lastname,
@@ -90,7 +90,7 @@ router.post("/", async (req, res) => {
               ]
           );
           await client.query('COMMIT');
-          res.json("created successfully!");
+          res.status(200).json(response.rows[0]);
         } catch (error) {
           await client.query('ROLLBACK');
           console.error(error.stack);
@@ -107,7 +107,11 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req,res)=>{
   try {
-    await pool.query(`SELECT * from employees`, (err, response) => {
+    await pool.query(`SELECT employees.*, departments.dept_name,grades.grade_name,grades.salary 
+    FROM employees 
+    JOIN departments ON employees.dept_id  = departments.dept_id
+    JOIN grades ON employees.grade_id  = grades.grade_id
+    `, (err, response) => {
       if (err) {
         console.log(err.stack);
       } else {
@@ -127,7 +131,10 @@ router.get('/:id', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const response = await client.query('SELECT * FROM "employees" WHERE "Organization_id" = $1', [id]);
+    const response = await client.query('SELECT employees.*, departments.dept_name FROM employees JOIN departments ON employees.dept_id  = departments.dept_id  WHERE employees.Organization_id = $1', [id]);
+    
+    // SELECT * FROM "employees" WHERE "Organization_id" = $1
+    // ', [id]);
     const organization = response.rows[0];
     res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
     await client.query('COMMIT');
@@ -147,45 +154,119 @@ router.put('/:id', async (req, res) => {
   try {
     await client.query('BEGIN');
     const org_id = req.params.id;
-    const { org_name, logo, email, phone, ent} = req.body;
-
+    const { Fnames, Lnames, NID, pic_url, address1, address2, grade_id, salary, phone, nhif, nssf, pin, email, periodf, periodt, payment, bankaccountno, dept_id, ent_id, account_type, bankbranch, bankname, contracttype } = req.body;
     const updateValues = [];
     const updateFields = [];
-    if (org_name) {
-      updateValues.push(org_name);
-      updateFields.push('org_name = $' + updateValues.length);
+    if (Fnames) {
+      updateValues.push(Fnames);
+      updateFields.push('firstname = $' + updateValues.length);
     }
-    if (logo) {
-      updateValues.push(logo);
-      updateFields.push('logo = $' + updateValues.length);
+    if (Lnames) {
+      updateValues.push(Lnames);
+      updateFields.push('lastname = $' + updateValues.length);
     }
-    if (email) {
-      updateValues.push(email);
-      updateFields.push('email = $' + updateValues.length);
+    if (NID) {
+      updateValues.push(NID);
+      updateFields.push('"ID" = $' + updateValues.length);
+    }
+    if (pic_url) {
+      updateValues.push(pic_url);
+      updateFields.push('pic_link = $' + updateValues.length);
+    }
+    if (address1) {
+      updateValues.push(address1);
+      updateFields.push('address1 = $' + updateValues.length);
+    }
+    if (address2) {
+      updateValues.push(address2);
+      updateFields.push('address2 = $' + updateValues.length);
+    }
+    if (grade_id) {
+      updateValues.push(grade_id);
+      updateFields.push('grade_id = $' + updateValues.length);
+    }
+    if (salary) {
+      updateValues.push(salary);
+      updateFields.push('salary = $' + updateValues.length);
     }
     if (phone) {
       updateValues.push(phone);
       updateFields.push('phone = $' + updateValues.length);
     }
+    if (nhif) {
+      updateValues.push(nhif);
+      updateFields.push('nhif = $' + updateValues.length);
+    }
+    if (nssf) {
+      updateValues.push(nssf);
+      updateFields.push('nssf = $' + updateValues.length);
+    }
+    if (pin) {
+      updateValues.push(pin);
+      updateFields.push('pin = $' + updateValues.length);
+    }
+    if (email) {
+      updateValues.push(email);
+      updateFields.push('email = $' + updateValues.length);
+    }
+    if (periodf) {
+      updateValues.push(periodf);
+      updateFields.push('period_from = $' + updateValues.length);
+    }
+    if (periodt) {
+      updateValues.push(periodt);
+      updateFields.push('period_to = $' + updateValues.length);
+    }
+    if (payment) {
+      updateValues.push(payment);
+      updateFields.push('pay_id = $' + updateValues.length);
+    }
+    if (bankaccountno) {
+      updateValues.push(bankaccountno);
+      updateFields.push('account_no = $' + updateValues.length);
+    }
+    if (dept_id) {
+      updateValues.push(dept_id);
+      updateFields.push('dept_id = $' + updateValues.length);
+    }
+    if (ent_id) {
+      updateValues.push(ent_id);
+      updateFields.push('ent_id = $' + updateValues.length);
+    }
+    if (account_type) {
+      updateValues.push(account_type);
+      updateFields.push('account_type = $' + updateValues.length);
+    }
+    if (bankbranch) {
+      updateValues.push(bankbranch);
+      updateFields.push('bank_branch = $' + updateValues.length);
+    }
+    if (bankname) {
+      updateValues.push(bankname);
+      updateFields.push('bank_name = $' + updateValues.length);
+    }
+    if (contracttype) {
+      updateValues.push(contracttype);
+      updateFields.push('contract = $' + updateValues.length);
+    }
 
-     if (ent) {
-     updateValues.push(ent);
-       updateFields.push('"Has_entity" = $' + updateValues.length);
-     }
-    const updateQuery = `UPDATE "employees" SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
-    const values = updateValues.concat(org_id);
-    const response = await client.query(updateQuery, values);
+    updateValues.push(org_id);
+
+    const updateQuery = `UPDATE "employees" SET ${updateFields.join(', ')} WHERE "emp_id" = $${updateValues.length} RETURNING *`;
+
+    const response = await client.query(updateQuery, updateValues);
+
     if (response.rows.length > 0) {
       await client.query('COMMIT');
-      res.json('Successfully updated');
+      res.json(response.rows[0]);
     } else {
       await client.query('ROLLBACK');
-      res.status(404).json('Organization not found');
+      res.status(404).json('Employee not found');
     }
   } catch (error) {
     await client.query('ROLLBACK');
     console.error(error.message);
-    res.status(500).json('Error occurred while updating organization');
+    res.status(500).json('Error occurred while updating employee');
   } finally {
     client.release();
   }
@@ -197,7 +278,7 @@ router.put('/:id', async (req, res) => {
 router.delete("/:id", async (req, res) => {
 
   const query = {
-    text: `DELETE FROM "employees" WHERE "Organization_id" = $1 RETURNING *`,
+    text: `DELETE FROM employees WHERE emp_id = $1 RETURNING *`,
     values: [req.params.id]
   }
 
@@ -206,7 +287,7 @@ router.delete("/:id", async (req, res) => {
     if (err) {
       console.log(err.stack)
     } else {
-      res.json("Successfully deleted!");
+      res.json(response.rows[0]);
     }
   });
 });

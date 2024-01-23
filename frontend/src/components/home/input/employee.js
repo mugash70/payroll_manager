@@ -1,8 +1,9 @@
 import React, { useRef, useState,useEffect } from 'react';
 import Draggable from 'react-draggable';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined,UserOutlined } from '@ant-design/icons';
 import { useDispatch,useSelector  } from 'react-redux';
 import {useReloadKey} from '../../default/index'
+import moment from "moment"
 import { Button, Modal,
     Divider,
     Cascader,
@@ -16,13 +17,14 @@ import { Button, Modal,
     Select,
     Slider,
     Switch,
-    TreeSelect,
+    Avatar,
+    Popover,
     Col,
     Row,
     Upload, } from 'antd';
 import axios from 'axios';
 import {BASE_API_URL} from '../../../actions/types'
-import {post_data} from '../../../actions/all'
+import {post_data,update_data,setLoading} from '../../../actions/all'
 
 const normFile = (e) => {
     if (Array.isArray(e)) {
@@ -36,7 +38,8 @@ const normFile = (e) => {
 const Employee = ({ type,record }) => {
 
   const gradeData = useSelector((state) => state.all.grades.data);
-  console.log(gradeData);
+  const deptData = useSelector((state) => state.all.departments.data);
+  
   const jobs =useSelector((state) =>  state.all.employees.data);
 
   const [selectedGrade, setSelectedGrade] = useState(null);
@@ -59,6 +62,7 @@ const Employee = ({ type,record }) => {
     setSelectedGrade(grade);
     setUserData({ ...userData, grade: grade.grade_id, grade_id: grade.grade_id, jobs: '',salary: grade.salary });
   };
+
   const handleContractChange = (event) => {
     setUserData({ ...userData, contracttype: event });
   };
@@ -69,12 +73,15 @@ const Employee = ({ type,record }) => {
 useEffect(() => {
   if (record) {
     setUserData({
+      emp_id:record.emp_id,
       Fnames: record.firstname,
       Lnames: record.lastname,
       address1: record.address1,
       address2: record.address2,
       NID: record.ID,
       grade: record.grade_id,
+      dept_id: record.dept_id_id,
+      dept_name:record.dept_name,
       salary: record.salary,
       phone: record.phone,
       email: record.email,
@@ -94,17 +101,33 @@ useEffect(() => {
   }
 }, [record]); 
 
-
+const content = (
+  <img src={userData.pic_url} alt="Preview" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+);
 
   const  handleAddUser = async () => {
-   
+    dispatch(setLoading(true));
     const Adddata = {
       ...userData,
       pic_url: selectedImage 
     };
-
   await post_data(Adddata,'/employees','employees')(dispatch);
+  handleReload()   
   setUserData({})
+  dispatch(setLoading(false)); 
+  setOpen(false);
+  }
+
+  const  handleUpdateUser = async () => {
+  
+    const Adddata = {
+      ...userData,
+      pic_url: selectedImage 
+    };
+    console.log(Adddata);
+  await update_data(Adddata,`/employees/${userData.emp_id}`,'employees')(dispatch);
+  handleReload()   
+  // setUserData({})
   setOpen(false);
   }
 
@@ -131,14 +154,14 @@ useEffect(() => {
 
   const handleInputChangefile =  async  (info) => {
 
-    if (info.file.status == 'done') {
+    if (info.file.status === 'done') {
       const { name, value } = info.file.response; 
-      setSelectedImage(info.file.response.imageUrls.map(image => image.url));
+      setSelectedImage(info.file.response.imageUrls[0].url);
       setUserData((prevFormData) => ({
         ...prevFormData,
         [name]: value,
       }));
-    } else if (info.file.status =='removed') {
+    } else if (info.file.status ==='removed') {
       var x = info.file.response.imageUrls.map(image => image.filen)
       await axios.delete(`${BASE_API_URL}/upload/${x}`);
       
@@ -155,6 +178,10 @@ useEffect(() => {
   const handlePayChange = (event) => {
     const value  = event;
     setUserData({ ...userData, payment: value });
+  };
+  const handledeptChange = (event) => {
+    const value  = event;
+    setUserData({ ...userData, dept_id: value });
   };
   const handleCancel = (e) => {
     setOpen(false);
@@ -189,7 +216,7 @@ useEffect(() => {
   
 
   const renderBankDetails = () => {
-    if (userData.payment == '2') {
+    if (userData.payment === '2') {
       return (
 
 <Row gutter={16}>
@@ -231,7 +258,7 @@ useEffect(() => {
   };
   return (
     <>
-    {type == 'create' ? (
+    {type === 'create' ? (
       <Button onClick={showModal}>Add employees</Button>
     ) : (
       <Button onClick={showModal} type="primary">Update</Button>
@@ -244,14 +271,22 @@ useEffect(() => {
             onMouseOut={() => {setDisabled(true);}}
             onFocus={() => {}}onBlur={() => {}}
            >
-            {type == 'create' ? (
-            <h3>Add Employee</h3>):(<h3>Update Employee Details</h3>)}
+            {type === 'create' ? (
+            <h3>Add Employee</h3>):(
+            <Row>
+            <Popover content={content} trigger="hover">
+            <Avatar size={64}  src={userData.pic_url} icon={<UserOutlined />}/>
+            </Popover>
+            <h3 style={{ marginLeft: '10px' }}>Update Employee Details</h3>
+            </Row>
+
+            )}
           </div>
-        }open={open} width={1000} onOk={handleAddUser} onCancel={handleCancel} modalRender={(modal) => (<Draggable disabled={disabled} bounds={bounds} nodeRef={draggleRef} onStart={(event, uiData) => onStart(event, uiData)}><div ref={draggleRef}>{modal}</div></Draggable>)}>
+        }open={open} width={1000} onOk={type === 'create' ? handleAddUser : handleUpdateUser} onCancel={handleCancel} modalRender={(modal) => (<Draggable disabled={disabled} bounds={bounds} nodeRef={draggleRef} onStart={(event, uiData) => onStart(event, uiData)}><div ref={draggleRef}>{modal}</div></Draggable>)}>
         <Form labelCol={{span: 5,}} wrapperCol={{span: 17,}}layout="horizontal" style={{maxWidth:'100%',}} >
         {/* onFinish={onFinish} */}
   
-{type == 'create' ? (
+{type === 'create' ? (
   <Row>
         <Col span={12}>
       
@@ -370,18 +405,33 @@ useEffect(() => {
               onChange={handleInputChange} 
           />
         </Form.Item>
+      <Row justify="space-evenly">
       <Form.Item
-        label="Period From"
-  
+        span={7}
+        label="From"
         value={userData.periodf}>
        <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodf', dateString)} />
       </Form.Item>
       <Form.Item
-        label="Period To"
-    
+        span={4}
+        label=" To"
         value={userData.periodt}>
         <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodt', dateString)} />;
       </Form.Item>
+      </Row>
+
+      <Form.Item label="Department" >
+        <Select
+          onChange={handledeptChange}
+        >
+          {open && deptData.map(dept => (
+            <Select.Option key={dept.dept_id} value={dept.dept_id}>
+            {dept.dept_name}
+            </Select.Option>
+          ))}
+        </Select>
+   </Form.Item>
+
         <Form.Item label="Phone"
     
          onChange={handleInputChange} 
@@ -461,6 +511,7 @@ useEffect(() => {
 
 ):( record ? (
         <Row>
+      
         <Col span={12}>
         <Form.Item label="First names"
         rules={[
@@ -582,18 +633,44 @@ useEffect(() => {
               onChange={handleInputChange} 
           />
         </Form.Item>
-      <Form.Item
-        label="Period From"
-  
-        value={userData.periodf}>
+       {/* <Row justify="space-evenly">
+      <Form.Item span={2} label="From">
+           <span>{userData.periodf}</span>
        <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodf', dateString)} />
       </Form.Item>
-      <Form.Item
-        label="Period To"
-  
-        value={userData.periodt}>
+      <Form.Item span={2} label=" To">
+        <span>{userData.periodt}</span>
         <DatePicker  onChange={(date, dateString) => handleInputChangedate('periodt', dateString)} />;
       </Form.Item>
+      </Row> */}
+<Row justify="space-evenly">
+  <Form.Item span={2} label="From">
+    {/* <span>{userData.periodf}</span> */}
+    <DatePicker
+      onChange={(date, dateString) => handleInputChangedate('periodf', dateString)}
+      value={userData.periodf ? moment(userData.periodf, 'YYYY-MM-DD') : null}
+    />
+  </Form.Item>
+  <Form.Item span={2} label=" To">
+    {/* <span>{userData.periodt}</span> */}
+    <DatePicker
+      onChange={(date, dateString) => handleInputChangedate('periodt', dateString)}
+      value={userData.periodt ? moment(userData.periodt, 'YYYY-MM-DD') : null}
+    />
+  </Form.Item>
+</Row>
+      <Form.Item label="Department" >
+        <Select
+          onChange={handledeptChange}
+           value={userData.dept_name}
+        >
+          {open && deptData.map(dept => (
+            <Select.Option key={dept.dept_id} value={dept.dept_id}>
+            {dept.dept_name}
+            </Select.Option>
+          ))}
+        </Select>
+   </Form.Item>
         <Form.Item label="Phone"
          onChange={handleInputChange} 
          rules={[

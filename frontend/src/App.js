@@ -7,6 +7,7 @@ import Departments from './components/home/pages/departments'
 import Others from './components/home/pages/others'
 import Reports from './components/home/pages/reports'
 import Bd from './components/home/pages/b_d'
+import ED from './components/home/input/emp_details'
 // import history from './history';
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
       <Route exact path='/b&d' element={<Bd />} />
       <Route exact path='/others' element={<Others />} />
       <Route exact path='/reports' element={<Reports />} />
-    
+      <Route exact path='/employees/:id' element={<ED />} />
     </Routes>
     </div>
 </BrowserRouter>

@@ -1,5 +1,5 @@
 import React, { useEffect,useState } from 'react';
-import { Table,Button,Row,Col} from 'antd';
+import { Table,Button,Row,Col,Avatar} from 'antd';
 import Layoutx  from '../../default/layout';
 import {post_data,get_data,update_data,del_data} from '../../../actions/all'
 import Dept from '../../home/input/departments'
@@ -29,6 +29,7 @@ const isLoading = useSelector((state) =>  state.all.isLoading);
 const error = useSelector((state) => state.error.id);
 
   const columns = [
+
     {
       title: 'No.',
       dataIndex: 'dept_id',

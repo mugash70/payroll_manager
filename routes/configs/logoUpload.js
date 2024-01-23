@@ -24,12 +24,20 @@ router.post('/', upload.array('pic_url', 5), (req, res) => {
     return res.status(400).json({ message: 'No images provided.' });
   }
   const imageUrls = req.files.map(file => ({
-    url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`,
+    url: `${req.protocol}://${req.get('host')}/upload/${file.filename}`,
     originalname: file.originalname,
     filen:file.filename,
   }));
   res.json({ imageUrls });
 });
+
+router.get('/:filename', (req, res) => {
+  const { filename } = req.params;
+  console.log(filename);
+  const filePath = path.join(uploadDirectory, filename);
+  res.sendFile(filePath);
+});
+
 
 
 router.delete('/:fileName', (req, res) => {

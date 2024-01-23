@@ -21,11 +21,8 @@ export const handleUpload = async (selectedImage) => {;
 
 
 export const post_data = (postdata,path,types) => async dispatch => {
-  
   const config = { headers: { "Content-type": "application/json" } };
     const body = JSON.stringify(postdata);
-    console.log(postdata);
-    console.log(BASE_API_URL,path);
     await axios.post(`${BASE_API_URL}${path}`, body, config)
       .then((res) => {
         dispatch({ type: ADDED, payload: res.data, dataType: types });
@@ -45,8 +42,7 @@ export const post_data = (postdata,path,types) => async dispatch => {
   export var update_data = (updatedata,path,types) =>async dispatch => {
     var config = { headers: { "Content-type": "application/json" } }
     var body = JSON.stringify(updatedata)
-
-    await  axios.post(`${BASE_API_URL}${path}`, body, config)
+    await  axios.put(`${BASE_API_URL}${path}`, body, config)
         .then(res => dispatch({ type: UPDATED, payload: res.data,dataType: types }))
         .catch(err => { dispatch(findErrors(err.data, err.status, 'LOADED_FAIL')); dispatch({ type: LOADED_FAIL }) })
 }

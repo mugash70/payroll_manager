@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Table,Button,Row,Col,theme } from 'antd';
+import { Table,Button,Row,Col,theme,Avatar} from 'antd';
+import { Link } from "react-router-dom";
 import Layoutx  from '../../default/layout';
 import {post_data,get_data,update_data,del_data} from '../../../actions/all'
 import { useDispatch,useSelector  } from 'react-redux';
@@ -8,13 +9,20 @@ import Alert from '../../default/alert'
 import Emp from '../../home/input/employee'
 import Confrim from '../../default/confrim'
 import {useReloadKey} from '../../default/index'
-
+import {UserOutlined } from '@ant-design/icons';
 const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};
 
 const breadcrumbs = ['dashboard','employees'];
 const Employeedash = () => {
   const {reloadKey, handleReload} = useReloadKey();
     const columns = [
+      {
+        title: 'Profile',
+        dataIndex: 'pic_link',
+        render: (avatarUrl, record) => (
+          <Avatar size={64} src={avatarUrl} icon={<UserOutlined />}/>
+        )
+      },
         {
           title: 'First Name',
           dataIndex: 'firstname',
@@ -31,7 +39,7 @@ const Employeedash = () => {
         },
         {
           title: 'Grade',
-          dataIndex: 'grade',
+          dataIndex: 'grade_name',
           defaultSortOrder: 'descend',
           sorter: (a, b) => a.age - b.age,
         },
@@ -49,17 +57,22 @@ const Employeedash = () => {
         },
         {
           title: 'Department',
-          dataIndex: 'department',
+          dataIndex: 'dept_name',
           filters: [{text: 'London',value: 'London',},{text: 'New York',value: 'New York',},],
           onFilter: (value, record) => record.address.indexOf(value) === 0,
         },
         {title: 'Action',
           render: (text, record) => (
             <Row gutter={[20]}>
+             <Col>
+            <Button >
+              <Link to={`/employees/${record.emp_id}`}>View</Link>
+            </Button>
+            </Col>
+
             <Col>
             {<Emp  key={record.emp_id} record={record} type="update"/>}
             </Col>
-       
             <Col>      
             {<Confrim  msg ={'Are sure you want ot delete the Employees ?'}
              handleDelete={() => handleDel(record.emp_id)} 
@@ -74,11 +87,10 @@ const Employeedash = () => {
 const handleDel= async (dept_id)=>{
 
   try {
-    await del_data(`/employees/${dept_id}`, 'employees')(dispatch);   
+    await del_data(`/employees/${dept_id}`, 'employees')(dispatch);
+    handleReload()   
   } catch (err) {
     console.error(err);
-  }finally{
-    handleReload()
   }
 }
 const employeeData = useSelector((state) =>  state.all.employees.data);
@@ -91,7 +103,8 @@ useEffect(() => {
     const fetchData = async () => {
       try {
         await get_data('/employees', 'employees')(dispatch);
-        await get_data('/grades', 'grades')(dispatch);      
+        await get_data('/grades', 'grades')(dispatch);
+        await get_data('/entity/ent/departments', 'departments')(dispatch);        
       } catch (err) {
         console.error(err);
       }
