@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {PlusOutlined,MinusOutlined,DollarOutlined,CalendarOutlined,FileSearchOutlined,FolderOpenOutlined,LoadingOutlined,TeamOutlined} from '@ant-design/icons';
-import { Tabs,Avatar, List,Row,Typography } from 'antd';
+import { Tabs,Avatar, List,Row,Typography,Divider,Skeleton,Descriptions } from 'antd';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import Layoutx  from '../../default/layout';
 import { useDispatch,useSelector  } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import {useReloadKey} from '../../default/index'
 import {post_data,get_data,update_data,del_data} from '../../../actions/all'
 
@@ -16,6 +18,7 @@ const breadcrumbs = ['dashboard','employees','details'];
 
 const Allowance =()=>{
   const allowancedata = useSelector((state) =>  state.all.adjustments.data);
+
   return(
     <>
     <List
@@ -28,12 +31,13 @@ const Allowance =()=>{
           title={<a href="https://ant.design">{item.adj_name.toUpperCase()}{'('+ item.adj_type +')'}</a>}
           description={
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <h4 style={{ textAlign: 'left' }}>{item.amount}</h4>
-            <h3 style={{ textAlign: 'center', display: 'flex', justifyContent: 'space-between' }}>
+            <h4 style={{ textAlign: 'left' }}>{item.period}</h4>
+           {item.from && item.to ? <h3 style={{ textAlign: 'center', display: 'flex', justifyContent: 'space-between' }}>
                   <span>From: {new Date(item.from).toLocaleDateString()}</span>
                   <span>To: {new Date(item.to).toLocaleDateString()}</span>
-                </h3>
-                <Title style={{ textAlign: 'right', fontSize: '200%', color: 'black' }}>
+                </h3>:<span>Permanent</span>
+                }
+                <Title style={{ textAlign: 'right', fontSize: '20px', color: 'black' }}>
                   {item.amount_type === 'percentage' ? item.amount + '%' : item.amount}
                 </Title>
        </div> }
@@ -45,32 +49,300 @@ const Allowance =()=>{
   )
 }
 const Leave =()=>{
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const loadMoreData = () => {
+    if (loading) {
+      return;
+    }
+    setLoading(true);
+    fetch('https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo')
+      .then((res) => res.json())
+      .then((body) => {
+        setData([...data, ...body.results]);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  };
+  useEffect(() => {
+    loadMoreData();
+  }, []);
+
   return(
     <>
-    
+        <div
+      id="scrollableDiv"
+      style={{
+        height: 400,
+        overflow: 'auto',
+        padding: '0 16px',
+        border: '1px solid rgba(140, 140, 140, 0.35)',
+      }}
+    >
+      <InfiniteScroll
+        dataLength={data.length}
+        next={loadMoreData}
+        hasMore={data.length < 50}
+        loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+        endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+        scrollableTarget="scrollableDiv"
+      >
+        <List
+          dataSource={data}
+          renderItem={(item) => (
+            <List.Item key={item.email}>
+              <List.Item.Meta
+                avatar={<Avatar src={item.picture.large} />}
+                title={<a href="https://ant.design">{item.name.last}</a>}
+                description={item.email}
+              />
+              <div>Content</div>
+            </List.Item>
+          )}
+        />
+      </InfiniteScroll>
+    </div>
     
     </>
   )
 }
 
 const History =()=>{
-  return(
-    <>
-    
-    
-    </>
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState([]);
+    const loadMoreData = () => {
+      if (loading) {
+        return;
+      }
+      setLoading(true);
+      fetch('https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo')
+        .then((res) => res.json())
+        .then((body) => {
+          setData([...data, ...body.results]);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+    };
+    useEffect(() => {
+      loadMoreData();
+    }, []);
+  
+    return(
+      <>
+          <div
+        id="scrollableDiv"
+        style={{
+          height: 400,
+          overflow: 'auto',
+          padding: '0 16px',
+          border: '1px solid rgba(140, 140, 140, 0.35)',
+        }}
+      >
+        <InfiniteScroll
+          dataLength={data.length}
+          next={loadMoreData}
+          hasMore={data.length < 50}
+          loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+          endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+          scrollableTarget="scrollableDiv"
+        >
+          <List
+            dataSource={data}
+            renderItem={(item) => (
+              <List.Item key={item.email}>
+                <List.Item.Meta
+                  avatar={<Avatar src={item.picture.large} />}
+                  title={<a href="https://ant.design">{item.name.last}</a>}
+                  description={item.email}
+                />
+                <div>Content</div>
+              </List.Item>
+            )}
+          />
+        </InfiniteScroll>
+      </div>
+      
+      </>
   )
 }
 
 const Attendance =()=>{
+
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const loadMoreData = () => {
+    if (loading) {
+      return;
+    }
+    setLoading(true);
+    fetch('https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo')
+      .then((res) => res.json())
+      .then((body) => {
+        setData([...data, ...body.results]);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  };
+  useEffect(() => {
+    loadMoreData();
+  }, []);
+
   return(
     <>
-    
+        <div
+      id="scrollableDiv"
+      style={{
+        height: 400,
+        overflow: 'auto',
+        padding: '0 16px',
+        border: '1px solid rgba(140, 140, 140, 0.35)',
+      }}
+    >
+      <InfiniteScroll
+        dataLength={data.length}
+        next={loadMoreData}
+        hasMore={data.length < 50}
+        loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+        endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+        scrollableTarget="scrollableDiv"
+      >
+        <List
+          dataSource={data}
+          renderItem={(item) => (
+            <List.Item key={item.email}>
+              <List.Item.Meta
+                avatar={<Avatar src={item.picture.large} />}
+                title={<a href="https://ant.design">{item.name.last}</a>}
+                description={item.email}
+              />
+              <div>Content</div>
+            </List.Item>
+          )}
+        />
+      </InfiniteScroll>
+    </div>
     
     </>
-  )
+    )
 }
+
+const Slip =()=>{
+
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const loadMoreData = () => {
+    if (loading) {
+      return;
+    }
+    setLoading(true);
+    fetch('https://randomuser.me/api/?results=10&inc=name,gender,email,nat,picture&noinfo')
+      .then((res) => res.json())
+      .then((body) => {
+        setData([...data, ...body.results]);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  };
+  useEffect(() => {
+    loadMoreData();
+  }, []);
+
+  return(
+    <>
+        <div
+      id="scrollableDiv"
+      style={{
+        height: 400,
+        overflow: 'auto',
+        padding: '0 16px',
+        border: '1px solid rgba(140, 140, 140, 0.35)',
+      }}
+    >
+      <InfiniteScroll
+        dataLength={data.length}
+        next={loadMoreData}
+        hasMore={data.length < 50}
+        loader={<Skeleton avatar paragraph={{ rows: 1 }} active />}
+        endMessage={<Divider plain>It is all, nothing more 🤐</Divider>}
+        scrollableTarget="scrollableDiv"
+      >
+        <List
+          dataSource={data}
+          renderItem={(item) => (
+            <List.Item key={item.email}>
+              <List.Item.Meta
+                avatar={<Avatar src={item.picture.large} />}
+                title={<a href="https://ant.design">{item.name.last}</a>}
+                description={item.email}
+              />
+              <div>Content</div>
+            </List.Item>
+          )}
+        />
+      </InfiniteScroll>
+    </div>
+    
+    </>
+    )
+}
+
+
 const Detailsdash = () => {
+
+const location = useLocation();
+const { data } = location.state || {};
+console.log(data);
+const items = [
+  {
+    key: '1',
+    label: 'Employee Name',
+    children: data?.emp_name || 'N/A',
+  },
+  {
+    key: '2',
+    label: 'ID/Passport',
+    children: data?.id_passport || 'N/A',
+  },
+  {
+    key: '3',
+    label: 'Contract',
+    children: data?.contract || 'N/A',
+  },
+  {
+    key: '4',
+    label: 'Phone',
+    children: data?.phone || 'N/A',
+  },
+  {
+    key: '5',
+    label: 'Email',
+    children: data?.email || 'N/A',
+  },
+  {
+    key: '6',
+    label: 'Department',
+    children: data?.department || 'N/A',
+  },
+  {
+    key: '7',
+    label: 'Tax pin',
+    children: data?.tax_pin || 'N/A',
+  },
+  {
+    key: '8',
+    label: 'Grade',
+    children: data?.grade || 'N/A',
+  },
+];
+
 const dispatch = useDispatch()
 const {reloadKey, handleReload} = useReloadKey();
 useEffect(() => {
@@ -97,6 +369,10 @@ useEffect(() => {
   const TabNames = ['Allowance/Deductions', 'Leave/Attendnace', 'History', 'slips', 'Attendnace', 'Other'];
 
   return (
+    <>
+    <div>
+      <Descriptions title="Employee Info" items={items} />
+    </div>
     <Tabs defaultActiveKey="1">
     {[DollarOutlined, CalendarOutlined, FolderOpenOutlined, FileSearchOutlined, TeamOutlined, LoadingOutlined].map((Icon, i) => {
       const id = String(i + 1);
@@ -111,10 +387,12 @@ useEffect(() => {
                   return <Leave />;
                 case 2:
                   return <History />;
-                case 4:
+                case 3:
                   return <Attendance />;
-                // case 5:
-                //   return <Other />;
+                case 4:
+                  return <Slip />;
+                case 6:
+                  return <Slip />;
                 default:
                   return null;
               }
@@ -122,7 +400,7 @@ useEffect(() => {
         </TabPane>
       );
     })}
-  </Tabs>
+  </Tabs></>
   );
 };
 const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Detailsdash} />;

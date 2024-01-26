@@ -66,7 +66,7 @@ const Employeedash = () => {
             <Row gutter={[20]}>
              <Col>
             <Button >
-              <Link to={`/employees/${record.emp_id}`}>View</Link>
+              <Link to={{ pathname: `/employees/${record.emp_id}`, state: { data: record } }}>View</Link>
             </Button>
             </Col>
 
