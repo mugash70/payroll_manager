@@ -1,100 +1,129 @@
-import React from 'react';
-import { Table } from 'antd';
+import React, { useEffect, useState } from 'react';
+import {PlusOutlined,MinusOutlined,DollarOutlined,CalendarOutlined,FileSearchOutlined,FolderOpenOutlined,LoadingOutlined,TeamOutlined} from '@ant-design/icons';
+import { Tabs,Avatar, List,Row,Typography } from 'antd';
 import Layoutx  from '../../default/layout';
+import { useDispatch,useSelector  } from 'react-redux';
+import {useReloadKey} from '../../default/index'
 import {post_data,get_data,update_data,del_data} from '../../../actions/all'
 
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    filters: [
-      {
-        text: 'Joe',
-        value: 'Joe',
-      },
-      {
-        text: 'Jim',
-        value: 'Jim',
-      },
-      {
-        text: 'Submenu',
-        value: 'Submenu',
-        children: [
-          {
-            text: 'Green',
-            value: 'Green',
-          },
-          {
-            text: 'Black',
-            value: 'Black',
-          },
-        ],
-      }, ],
-    onFilter: (value, record) => record.name.indexOf(value) === 0,
-    sorter: (a, b) => a.name.length - b.name.length,
-    sortDirections: ['descend'],
-  },
-  {
-    title: 'Grade',
-    dataIndex: 'grade',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
-  },
-  {
-    title: 'Age',
-    dataIndex: 'age',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
-  },
-  {
-    title: 'Salary',
-    dataIndex: 'salary',
-    defaultSortOrder: 'descend',
-    sorter: (a, b) => a.age - b.age,
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address',
-    filters: [{text: 'London',value: 'London',},{text: 'New York',value: 'New York',},],
-    onFilter: (value, record) => record.address.indexOf(value) === 0,
-  },
-  {
-    title: 'Department',
-    dataIndex: 'department',
-    filters: [{text: 'London',value: 'London',},{text: 'New York',value: 'New York',},],
-    onFilter: (value, record) => record.address.indexOf(value) === 0,
-  },
-];
-const data = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'New York No. 1 Lake Park',
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'London No. 1 Lake Park',
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'Sydney No. 1 Lake Park',
-  },
-  {
-    key: '4',
-    name: 'Jim Red',
-    age: 32,
-    address: 'London No. 2 Lake Park',
-  },
-];
-
-const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};
-
+const { TabPane } = Tabs;
+const { Title } = Typography;
 const breadcrumbs = ['dashboard','employees','details'];
-const Employeedash = () => <Table columns={columns} dataSource={data} onChange={onChange} />;
-const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Employeedash} />;
+
+
+
+
+
+const Allowance =()=>{
+  const allowancedata = useSelector((state) =>  state.all.adjustments.data);
+  return(
+    <>
+    <List
+    itemLayout="horizontal"
+    dataSource={allowancedata}
+    renderItem={(item, index) => (
+      <List.Item>
+        <List.Item.Meta
+          avatar={<Avatar icon={item.adj_type !=='Bonus' ?<MinusOutlined />:<PlusOutlined />} />}
+          title={<a href="https://ant.design">{item.adj_name.toUpperCase()}{'('+ item.adj_type +')'}</a>}
+          description={
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <h4 style={{ textAlign: 'left' }}>{item.amount}</h4>
+            <h3 style={{ textAlign: 'center', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>From: {new Date(item.from).toLocaleDateString()}</span>
+                  <span>To: {new Date(item.to).toLocaleDateString()}</span>
+                </h3>
+                <Title style={{ textAlign: 'right', fontSize: '200%', color: 'black' }}>
+                  {item.amount_type === 'percentage' ? item.amount + '%' : item.amount}
+                </Title>
+       </div> }
+        />
+      </List.Item>
+   )}
+   />
+    </>
+  )
+}
+const Leave =()=>{
+  return(
+    <>
+    
+    
+    </>
+  )
+}
+
+const History =()=>{
+  return(
+    <>
+    
+    
+    </>
+  )
+}
+
+const Attendance =()=>{
+  return(
+    <>
+    
+    
+    </>
+  )
+}
+const Detailsdash = () => {
+const dispatch = useDispatch()
+const {reloadKey, handleReload} = useReloadKey();
+useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await get_data('/entity/ent/adjustments', 'adjustments')(dispatch);
+        await get_data('/grades', 'grades')(dispatch);
+        await get_data('/entity/ent/departments', 'departments')(dispatch);        
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    if(reloadKey != 0){fetchData();}
+  }, [dispatch,reloadKey]);
+
+
+  const topRef = React.useRef(null);
+  const [targetOffset, setTargetOffset] = useState();
+  
+  useEffect(() => {
+    setTargetOffset(topRef.current?.clientHeight);
+  }, []);
+
+  const TabNames = ['Allowance/Deductions', 'Leave/Attendnace', 'History', 'slips', 'Attendnace', 'Other'];
+
+  return (
+    <Tabs defaultActiveKey="1">
+    {[DollarOutlined, CalendarOutlined, FolderOpenOutlined, FileSearchOutlined, TeamOutlined, LoadingOutlined].map((Icon, i) => {
+      const id = String(i + 1);
+      return (
+        <TabPane
+          tab={<span>{Icon && <Icon />} {TabNames[i]}</span>}key={id}>
+           {(() => {
+              switch (i) {
+                case 0:
+                  return <Allowance />;
+                case 1:
+                  return <Leave />;
+                case 2:
+                  return <History />;
+                case 4:
+                  return <Attendance />;
+                // case 5:
+                //   return <Other />;
+                default:
+                  return null;
+              }
+            })()}
+        </TabPane>
+      );
+    })}
+  </Tabs>
+  );
+};
+const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Detailsdash} />;
 export default Home;

@@ -33,7 +33,6 @@ router.post('/', upload.array('pic_url', 5), (req, res) => {
 
 router.get('/:filename', (req, res) => {
   const { filename } = req.params;
-  console.log(filename);
   const filePath = path.join(uploadDirectory, filename);
   res.sendFile(filePath);
 });
