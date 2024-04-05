@@ -1,6 +1,7 @@
 import React from  'react'
 import { Route, Routes, BrowserRouter } from 'react-router-dom'
 import Home from './components/home/index'
+import Login from './components/login'
 import Employees from './components/home/pages/employees'
 import Roles from './components/home/pages/role'
 import Departments from './components/home/pages/departments'
@@ -14,6 +15,7 @@ function App() {
     <BrowserRouter>
     <div>
     <Routes >
+    <Route exact path='/' element={<Login />} />
       <Route exact path='/dashboard' element={<Home />} />
       <Route exact path='/employees' element={<Employees />} />
       <Route exact path='/departments' element={<Departments />} />

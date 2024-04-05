@@ -65,13 +65,13 @@ const Employeedash = () => {
           render: (text, record) => (
             <Row gutter={[20]}>
              <Col>
-            <Button >
-              <Link to={{ pathname: `/employees/${record.emp_id}`, state: { data: record } }}>View</Link>
+            <Button shape="round">
+              <Link to={{ pathname: `/employees/${record.emp_id}`}}>View</Link>
             </Button>
             </Col>
 
             <Col>
-            {<Emp  key={record.emp_id} record={record} type="update"/>}
+            {<Emp key={record.emp_id} record={record} type="update"/>}
             </Col>
             <Col>      
             {<Confrim  msg ={'Are sure you want ot delete the Employees ?'}

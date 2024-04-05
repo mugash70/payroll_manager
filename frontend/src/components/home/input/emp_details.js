@@ -13,41 +13,115 @@ const { Title } = Typography;
 const breadcrumbs = ['dashboard','employees','details'];
 
 
+const Allowance = () => {
+  const allowancedata = useSelector((state) => state.all.adjustments.data);
+  const [dataLength, setDataLength] = useState(3);
 
+  const loadMoreItems = () => {
+    setDataLength(prevDataLength => prevDataLength + dataLength); 
+  };
 
-
-const Allowance =()=>{
-  const allowancedata = useSelector((state) =>  state.all.adjustments.data);
-
-  return(
-    <>
-    <List
-    itemLayout="horizontal"
-    dataSource={allowancedata}
-    renderItem={(item, index) => (
-      <List.Item>
-        <List.Item.Meta
-          avatar={<Avatar icon={item.adj_type !=='Bonus' ?<MinusOutlined />:<PlusOutlined />} />}
-          title={<a href="https://ant.design">{item.adj_name.toUpperCase()}{'('+ item.adj_type +')'}</a>}
-          description={
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <h4 style={{ textAlign: 'left' }}>{item.period}</h4>
-           {item.from && item.to ? <h3 style={{ textAlign: 'center', display: 'flex', justifyContent: 'space-between' }}>
-                  <span>From: {new Date(item.from).toLocaleDateString()}</span>
-                  <span>To: {new Date(item.to).toLocaleDateString()}</span>
-                </h3>:<span>Permanent</span>
-                }
-                <Title style={{ textAlign: 'right', fontSize: '20px', color: 'black' }}>
-                  {item.amount_type === 'percentage' ? item.amount + '%' : item.amount}
-                </Title>
-       </div> }
+  return (
+    <div
+    id="scrollableDiv"
+    style={{
+      height: 410,
+      overflow: 'auto',
+      padding: '0 16px',
+      border: '1px solid rgba(140, 140, 140, 0.35)',
+    }}
+  >
+    <InfiniteScroll
+    
+      dataLength={dataLength}
+      next={loadMoreItems}
+      hasMore={allowancedata.length}
+      loader={
+        <Skeleton
+          avatar
+          paragraph={{
+            rows: 1,
+          }}
+          active
         />
-      </List.Item>
-   )}
-   />
-    </>
-  )
-}
+      }
+    >
+      <List
+        itemLayout="horizontal"
+        dataSource={allowancedata.slice(0, dataLength)}
+        renderItem={(item, index) => (
+          <List.Item key={index}>
+            <List.Item.Meta
+              avatar={<Avatar icon={item.adj_type !== 'Bonus' ? <MinusOutlined /> : <PlusOutlined />} />}
+              title={<a href="https://ant.design">{item.adj_name.toUpperCase()}</a>}
+              description={
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <h4 style={{ textAlign: 'left' }}>{item.period}{'(' + item.adj_type + ')'}</h4>
+                  {item.from && item.to ? (
+                    <Title level={5} style={{ textAlign: 'center', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>From: {new Date(item.from).toLocaleDateString()}</span>
+                      {'\u00A0\u00A0\u00A0'} {/* Adjusting space */}
+                      <span>To: {new Date(item.to).toLocaleDateString()}</span>
+                    </Title>
+                  ) : (
+                    <Title level={3}>∞</Title>
+                  )}
+                  <Title style={{ textAlign: 'right', fontSize: '20px', color: 'black' }}>
+                    {item.amount_type === 'percentage' ? item.amount + '%' : item.amount}
+                  </Title>
+                </div>
+              }
+            />
+          </List.Item>
+        )}
+      />
+    </InfiniteScroll>
+    </div>
+  );
+};
+
+
+// const Allowance =()=>{
+//   const allowancedata = useSelector((state) =>  state.all.adjustments.data);
+
+//   return(
+//     <>
+//     <List
+//     itemLayout="horizontal"
+//     dataSource={allowancedata}
+//     renderItem={(item, index) => (
+
+//   <List.Item>
+//   <List.Item.Meta
+//     avatar={<Avatar icon={item.adj_type !== 'Bonus' ? <MinusOutlined /> : <PlusOutlined />} />}
+//     title={<a href="https://ant.design">{item.adj_name.toUpperCase()}{'(' + item.adj_type + ')'}</a>}
+//     description={
+//      <div style={{display: 'flex', justifyContent: 'space-between' }}>
+//         <h4 style={{ textAlign: 'left' }}>{item.period}</h4>
+//         {item.from && item.to ? (
+//           <Title level={4} style={{ textAlign: 'center', display: 'flex', justifyContent: 'space-between' }}>
+//             <span>From:{new Date(item.from).toLocaleDateString()}</span>{'\u00A0\u00A0\u00A0'}
+//             <span>To:{new Date(item.to).toLocaleDateString()}</span>
+//           </Title>
+//         ) : (
+//           <Title level={3} >∞</Title>
+//         )}
+//         <Title style={{ textAlign: 'right', fontSize: '20px', color: 'black' }}>
+//           {item.amount_type === 'percentage' ? item.amount + '%' : item.amount}
+//         </Title>
+// </div>
+
+    
+    
+//     }
+//   />
+// </List.Item>
+
+//    )}
+//    />
+//     </>
+//   )
+// }
 const Leave =()=>{
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -298,24 +372,25 @@ const Slip =()=>{
 const Detailsdash = () => {
 
 const location = useLocation();
-const { data } = location.state || {};
-console.log(data);
+const emp_id = location.pathname.split('/').pop();
+const [data,grade]= useSelector(state => {
+  var data=state.all.employees.data.find(employee => employee.emp_id === parseInt(emp_id));
+  var grade=state.all.grades.data.find(grade => grade.grade_id === parseInt(data.grade_id));
+  return [data,grade]  
+});
+
 const items = [
   {
     key: '1',
     label: 'Employee Name',
-    children: data?.emp_name || 'N/A',
+    children: data?.firstname+' '+data?.lastname || 'N/A',
   },
   {
     key: '2',
     label: 'ID/Passport',
-    children: data?.id_passport || 'N/A',
+    children: data?.ID || 'N/A',
   },
-  {
-    key: '3',
-    label: 'Contract',
-    children: data?.contract || 'N/A',
-  },
+
   {
     key: '4',
     label: 'Phone',
@@ -329,17 +404,22 @@ const items = [
   {
     key: '6',
     label: 'Department',
-    children: data?.department || 'N/A',
+    children: data?.dept_name || 'N/A',
   },
   {
     key: '7',
     label: 'Tax pin',
-    children: data?.tax_pin || 'N/A',
+    children: data?.pin || 'N/A',
   },
   {
     key: '8',
     label: 'Grade',
-    children: data?.grade || 'N/A',
+    children: data?.grade_name || 'N/A',
+  },
+  {
+    key: '3',
+    label: 'Basic Salary',
+    children: data?.salary || 'N/A',
   },
 ];
 
@@ -350,7 +430,8 @@ useEffect(() => {
       try {
         await get_data('/entity/ent/adjustments', 'adjustments')(dispatch);
         await get_data('/grades', 'grades')(dispatch);
-        await get_data('/entity/ent/departments', 'departments')(dispatch);        
+        await get_data('/entity/ent/departments', 'departments')(dispatch);
+        // await get_data('/entity/ent/departments', 'departments')(dispatch);     
       } catch (err) {
         console.error(err);
       }
