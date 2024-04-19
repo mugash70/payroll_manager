@@ -3,8 +3,7 @@ import React from "react";
 import { Button, Checkbox, Form, Grid, Input, theme, Typography,Card } from "antd";
 import Animate from './default/animate'
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
-import {post_data,get_data,update_data,del_data} from '../actions/all'
-import { useDispatch,useSelector  } from 'react-redux';
+
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
 const { Text, Title, Link } = Typography;
@@ -12,14 +11,9 @@ const { Text, Title, Link } = Typography;
 export default function App() {
   const { token } = useToken();
   const screens = useBreakpoint();
-  const dispatch = useDispatch()
-  const onFinish = async (values) => {
-    try {
-      await post_data(values,'/user/login','auth')(dispatch);  
-      // handleReload()
-    } catch (err) {
-      console.error(err);
-    }
+
+  const onFinish = (values) => {
+    console.log("Received values of form: ", values);
   };
 
   const styles = {
@@ -34,7 +28,7 @@ export default function App() {
       width: "100%"
     },
     forgotPassword: {
-      float: "right"
+      float: "left"
     },
     header: {
       marginBottom: token.marginXL
@@ -54,10 +48,10 @@ export default function App() {
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',marginTop:'-5%' }}>
         <Card className="shadow" style={{ width: '22rem', background: 'transparent'}}>
             <div style={styles.header}>
-              <Title style={styles.title}>Log In</Title>
+              <Title style={styles.title}>Reset Password</Title>
             </div>
                               <Form name="normal_login" initialValues={{remember: true,}} onFinish={onFinish} layout="vertical"requiredMark="optional">
-                                <Form.Item name="email"
+                                {/* <Form.Item name="email"
                                   rules={[ {
                                       type: "email",
                                       required: true,
@@ -69,33 +63,63 @@ export default function App() {
                                     prefix={<MailOutlined />}
                                     placeholder="Email"
                                   />
-                                </Form.Item>
+                                </Form.Item> */}
                                 <Form.Item
-                                  name="password"
+                                  name="old_password"
                                   rules={[
                                     {
                                       required: true,
-                                      message: "Please input your Password!",
+                                      message: "Please input your old Password!",
                                     },
                                   ]}
                                 >
                                   <Input.Password
                                     prefix={<LockOutlined />}
                                     type="password"
-                                    placeholder="Password"
+                                    placeholder="Old Password"
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  name="new_password"
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please input your new Password!",
+                                    },
+                                  ]}
+                                >
+                                  <Input.Password
+                                    prefix={<LockOutlined />}
+                                    type="password"
+                                    placeholder="New Password"
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  name="c_new_password"
+                                  rules={[
+                                    {
+                                      required: true,
+                                      message: "Please input your confrim new Password!",
+                                    },
+                                  ]}
+                                >
+                                  <Input.Password
+                                    prefix={<LockOutlined />}
+                                    type="password"
+                                    placeholder="Confrim new Password"
                                   />
                                 </Form.Item>
                                 <Form.Item>
-                                  <Form.Item name="remember" valuePropName="checked" noStyle>
+                                  {/* <Form.Item name="remember" valuePropName="checked" noStyle>
                                     <Checkbox>Remember me</Checkbox>
-                                  </Form.Item>
-                                  <a style={styles.forgotPassword} href="/forgot">
+                                  </Form.Item> */}
+                                  {/* <a style={styles.forgotPassword} href="/forgot">
                                     Forgot password?
-                                  </a>
+                                  </a> */}
                                 </Form.Item>
                                 <Form.Item style={{ marginBottom: "0px" }}>
                                   <Button block="true" type="primary" htmlType="submit">
-                                    Log in
+                                    Update
                                   </Button>
                                   {/* <div style={styles.footer}>
                                     <Text style={styles.text}>Don't have an account?</Text>{" "}

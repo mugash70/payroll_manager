@@ -23,19 +23,21 @@ const ReportsRoute = require("./routes/report")
 const BDRoute = require("./routes/employees")
 
 // const EmpRoute = require("./routes/employees")
+
 //middleware
 app.use(cors());
 
 
 //session
 var Oneday= 1000*60*60*24
+
 app.use(session({
-  secret:process.env.jwtSecret,
+  secret:process.env.JWTSTUFF,
   saveUninitialized:true,
   cookie:{maxAge:Oneday},
   resave:false
-
 }))
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -63,6 +65,6 @@ app.use(function (err, req, res, next) {
 });
 
 
-app.listen(5000, () => {
-  console.log('Server running on port 5000');
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on port ${process.env.PORT}`);
 });

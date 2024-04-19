@@ -1,7 +1,11 @@
 import React from  'react'
 import { Route, Routes, BrowserRouter } from 'react-router-dom'
 import Home from './components/home/index'
+
 import Login from './components/login'
+import Signup from './components/signup'
+import Forgot from './components/forgot'
+
 import Employees from './components/home/pages/employees'
 import Roles from './components/home/pages/role'
 import Departments from './components/home/pages/departments'
@@ -14,8 +18,12 @@ function App() {
   return (
     <BrowserRouter>
     <div>
-    <Routes >
+    <Routes>
+
     <Route exact path='/' element={<Login />} />
+    <Route exact path='/changepass' element={<Signup />} />
+    <Route exact path='/forgot' element={<Forgot />} />
+
       <Route exact path='/dashboard' element={<Home />} />
       <Route exact path='/employees' element={<Employees />} />
       <Route exact path='/departments' element={<Departments />} />
