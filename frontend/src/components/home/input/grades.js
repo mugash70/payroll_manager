@@ -70,7 +70,7 @@ const Roles = ({ type,record }) => {
   const  handleAddRole = async () => {
     // dispatch(setLoading(true)); 
     try{
-      await post_data(gradeData,'/grades','grades')(dispatch);
+      await post_data('ADDED',gradeData,'/grades','grades')(dispatch);
       handleReload() 
       setOpen(false);
     }catch(err){

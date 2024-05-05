@@ -93,8 +93,8 @@ router.post("/", async (req, res) => {
           res.status(200).json(response.rows[0]);
         } catch (error) {
           await client.query('ROLLBACK');
-          console.error(error.stack);
-          res.status(500).json("Error occurred while creating!");
+          // console.error(error.stack);
+          res.status(500).json(error,"Error occurred while creating!");
         } finally {
           client.release();
         }

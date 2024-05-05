@@ -111,7 +111,7 @@ const content = (
       ...userData,
       pic_url: selectedImage 
     };
-  await post_data(Adddata,'/employees','employees')(dispatch);
+  await post_data('ADDED',Adddata,'/employees','employees')(dispatch);
   handleReload()   
   setUserData({})
   dispatch(setLoading(false)); 

@@ -22,7 +22,7 @@ module.exports = {
         type: Sequelize.DATE
       },
       period: {
-        type: Sequelize.DATE
+        type: Sequelize.STRING
       },
 
       created_at: {

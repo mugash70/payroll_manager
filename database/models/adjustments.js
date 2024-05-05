@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   adjustments.init({
     adj_id: DataTypes.INTEGER,
     adj_name: DataTypes.STRING,
+    adj_type: DataTypes.STRING,
     amount: DataTypes.STRING,
     from: DataTypes.DATE,
     to: DataTypes.DATE,

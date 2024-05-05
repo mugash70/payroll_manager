@@ -1,1 +1,3 @@
+mpm install sequelize-cli
 npx sequelize-cli db:migrate
+npx sequelize-cli migration:create --name add_adjustment_type_column 

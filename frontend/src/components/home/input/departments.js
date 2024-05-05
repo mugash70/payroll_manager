@@ -63,7 +63,7 @@ const Departments = ({ type,record }) => {
   const dispatch = useDispatch()
   const  handleAddDept = async () => {
     try {
-      await post_data(deptData,'/entity/ent/departments','departments')(dispatch);
+      await post_data('ADDED',deptData,'/entity/ent/departments','departments')(dispatch);
       setOpen(false);
       setdeptData({})
       handleReload()

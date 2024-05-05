@@ -4,17 +4,9 @@ var app = express.Router()
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const pool = require("../database/config.js");
+var sendEmail= require('./email.js')
 const verifyToken = require('../middleware/authmiddleware');
-
-
-// app.post('/login',(req,res) => {
-//     session=req.session;
-//     if(session.userid){
-//         res.send("Welcome User <a href=\'/logout'>click to logout</a>");
-//     }else
-//     res.sendFile('views/index.html',{root:__dirname})
-// });
-
+const crypto = require('crypto');
 
 app.post("/login", async (req, res, next) => {
     try {
@@ -29,7 +21,7 @@ app.post("/login", async (req, res, next) => {
               );
 
             res.status(200).json({
-              token, user: { id: response.rows[0].emp_id, email: response.rows[0].email, name: response.rows[0].name }
+              token, user: response.rows[0]
             });
           }
         }
@@ -55,15 +47,31 @@ app.get('/createuser',(req,res) => {
     }
 })
 
-app.get('/forgot',async (req,res) => {
-  var {email} =req.body
-  const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-  if (user.rows.length === 0) {
-      return res.status(404).send(`User not found contact Admin :<a href='mailto:contact@example.com'>click to contact</a>`);
-  }else{
-    
-  }
-})
+
+
+
+app.post('/forgot', async (req, res) => {
+    const { email } = req.body;
+    const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    if (user.rows.length === 0) {
+        return res.status(404).send(`User Mail not found contact Admin`);
+    } else {
+        const token = crypto.randomBytes(20).toString('hex');
+        const resetLink = `${req.protocol}://${req.get('host')}/reset/${token}`;
+        const resetEmailTemplate = `
+            We received a request to reset the password for your account. If you did not make this request, please ignore this email.
+            To reset your password, please click on the following link:
+            ${resetLink}
+            This link is valid for [expiration period,24 hours]. If you don't reset your password within this time, you'll need to submit another request.
+            Thank you,
+            [Your Company Name]
+        `;
+
+        sendEmail(email, "Password Reset Request", resetEmailTemplate);
+        res.status(200).send({data:"Password reset instructions have been sent to your email."});
+    }
+});
+
 
 
 app.post('/reset-password', async (req, res) => {

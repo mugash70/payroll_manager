@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 
-import { Button, Checkbox, Form, Grid, Input, theme, Typography,Card } from "antd";
+import { Button, Form, Grid, Input, theme, Typography,Card,Alert } from "antd";
 import Animate from './default/animate'
-import { LockOutlined, MailOutlined } from "@ant-design/icons";
-
+import { MailOutlined } from "@ant-design/icons";
+import { useDispatch,useSelector} from 'react-redux';
+import {post_data} from '../actions/all'
+import {clearError } from '../actions/error'
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
 const { Text, Title, Link } = Typography;
@@ -11,10 +13,33 @@ const { Text, Title, Link } = Typography;
 export default function App() {
   const { token } = useToken();
   const screens = useBreakpoint();
+  const dispatch = useDispatch()
+  // const  error = useSelector(state => (state.error.msg));
+  const {  data, error } = useSelector(state => ({
+    data: state.auth.user,
+    error: state.error.msg
+}));
 
-  const onFinish = (values) => {
-    console.log("Received values of form: ", values);
+  const onFinish = async (values) => {
+    await post_data('AUTH_LOADING',values, '/user/forgot', 'AUTH_LOADING')(dispatch)
+  
   };
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+        dispatch(clearError());
+        
+    }, 3000);
+    return () => clearTimeout(timeout);
+}, [dispatch, error]);
+
+useEffect(() => {
+  const timeout = setTimeout(() => {
+      dispatch({type:'CLEAR_AUTH'});
+      
+  }, 3000);
+  return () => clearTimeout(timeout);
+}, [dispatch,data]);
+
 
   const styles = {
     container: {
@@ -51,6 +76,9 @@ export default function App() {
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',marginTop:'-5%' }}>
         <Card className="shadow" style={{ width: '22rem', background: 'transparent'}}>
             <div style={styles.header}>
+              {/* {error ?<Alert message={JSON.stringify(error)} type="error" ></Alert>:null} */}
+              {error && Object.keys(error).length > 0 ? <Alert message={JSON.stringify(error)} type="error" /> : null}
+              {data && Object.keys(data).length > 0 ? <Alert message={JSON.stringify(data)} type="success" /> : null}
               <Title style={{ ...styles.title, textAlign: 'center' }} >Forgot password ?</Title>
             </div>
                               <Form name="normal_login" initialValues={{remember: true,}} onFinish={onFinish} layout="vertical"requiredMark="optional">

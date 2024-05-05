@@ -1,19 +1,21 @@
 import React from "react";
 
-import { Button, Checkbox, Form, Grid, Input, theme, Typography,Card } from "antd";
+import { Button, Form, Grid, Input, theme, Typography,Card } from "antd";
 import Animate from './default/animate'
-import { LockOutlined, MailOutlined } from "@ant-design/icons";
-
+import { LockOutlined } from "@ant-design/icons";
+import {post_data} from '../actions/all'
+import { useDispatch} from 'react-redux';
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
-const { Text, Title, Link } = Typography;
+const { Title } = Typography;
 
 export default function App() {
   const { token } = useToken();
   const screens = useBreakpoint();
-
-  const onFinish = (values) => {
-    console.log("Received values of form: ", values);
+  const dispatch = useDispatch()
+  const onFinish = async(values) => {
+    await post_data('SUCCESS',values, '/user/reset', 'SUCCESS')(dispatch)
+  
   };
 
   const styles = {

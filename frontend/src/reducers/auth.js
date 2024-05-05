@@ -2,13 +2,10 @@ import {AUTH_LOADING,CLEAR_AUTH,SUCCESS,FAIL} from '../actions/types'
 
 var initialState = {
     token: localStorage.getItem('token'),
-    role: localStorage.getItem('role'),
-    ent: localStorage.getItem('ent_id'),
-    id: localStorage.getItem('id'),
-    org_id: localStorage.getItem('org_id'),
     isAuthenticated: null,
     user: null,
     isLoading:true,
+   
 }
 
 export default function Authreducer(state = initialState, action) {
@@ -18,15 +15,12 @@ export default function Authreducer(state = initialState, action) {
                 ...state,
                  [action.dataType]: {
                   ...state[action.dataType],
-                  data: action.payload
+                  data: action.payload,
+    
                 },
             }
         case SUCCESS:
             localStorage.setItem('token', action.payload.token)
-            localStorage.setItem('role', action.payload.user.role)
-            localStorage.setItem('id', action.payload.user.id)
-            localStorage.setItem('org_id', action.payload.user.org_id)
-            localStorage.setItem('ent_id', action.payload.user.ent_id)
             return {
                 ...state,
                 ...action.payload,

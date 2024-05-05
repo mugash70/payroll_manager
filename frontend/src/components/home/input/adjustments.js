@@ -69,7 +69,7 @@ const Roles = ({ type,record }) => {
   const  handleAddRole = async () => {
     dispatch(setLoading(true)); 
     try{
-      await post_data(AdjsData,'/entity/ent/adjustments','adjustments')(dispatch);
+      await post_data('ADDED',AdjsData,'/entity/ent/adjustments','adjustments')(dispatch);
       setAdjsData({});
       handleReload()
       setOpen(false);
