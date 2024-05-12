@@ -6,6 +6,9 @@ import Login from './components/login'
 import Signup from './components/signup'
 import Forgot from './components/forgot'
 
+import Organization from './components/home/pages/organizations'
+import Entities from './components/home/pages/entities'
+
 import Employees from './components/home/pages/employees'
 import Roles from './components/home/pages/role'
 import Departments from './components/home/pages/departments'
@@ -32,6 +35,9 @@ function App() {
       <Route exact path='/others' element={<Others />} />
       <Route exact path='/reports' element={<Reports />} />
       <Route exact path='/employees/:id' element={<ED />} />
+
+      <Route exact path='/organizations' element={<Organization />} />
+      <Route exact path='/entities' element={<Entities />} />
     </Routes>
     </div>
 </BrowserRouter>

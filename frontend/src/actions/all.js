@@ -23,25 +23,16 @@ export const handleUpload = async (selectedImage) => {;
 export const post_data = (type,postdata,path,types) => async dispatch => {
   const config = { headers: { "Content-type": "application/json" } };
     const body = JSON.stringify(postdata);
-  
     await axios.post(`${BASE_API_URL}${path}`, body, config)
       .then((res) => {dispatch({ type: type, payload: res.data, dataType: types });})
-      .catch((err) => {
-        dispatch(findErrors(err.response.data, err.response.status, 'LOADED_FAIL'));dispatch({ type: LOADED_FAIL });
-        // if (err.response) {
-        //   dispatch(findErrors(err.response.data, err.response.status, 'LOADED_FAIL'));
-        // } else {
-        //   // Handle other types of errors
-        //   console.error('Error occurred:', err);
-        // }
-      });
+      .catch((err) => {dispatch(findErrors(err.response.data, err.response.status, 'LOADED_FAIL'));dispatch({ type: LOADED_FAIL })});
   };
 
 
 
   export const get_data = (path,types) =>async dispatch => {
     await  axios.get(`${BASE_API_URL}${path}`)
-      .then(res => {dispatch({ type: LOADED, payload: res.data, dataType: types});})
+      .then(res => {console.log(res); dispatch({ type: LOADED, payload: res.data, dataType: types});})
       .catch(err => {dispatch(findErrors(err.data, err.status, 'LOADED_FAIL'));dispatch({ type: LOADED_FAIL });});
   };
 

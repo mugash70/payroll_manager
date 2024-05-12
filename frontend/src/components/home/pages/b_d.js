@@ -13,9 +13,13 @@ const breadcrumbs = ['dashboard','adjustments'];
 const Deddash = () => {
 const {reloadKey, handleReload} = useReloadKey();
 const dispatch = useDispatch()
-const deductionData = useSelector((state) =>  state.all.adjustments.data);
-const isLoading = useSelector((state) =>  state.all.isLoading);
-const error = useSelector((state) => state.error.id);
+const {deductionData,isLoading,error} = useSelector((state) =>({ 
+  deductionData: state.all.adjustments.data,
+  isLoading:state.all.isLoading,
+  error:state.error.msg,
+
+}));
+
 
 const handleDel= async (adj_id)=>{
   try {
@@ -109,12 +113,7 @@ const handleDel= async (adj_id)=>{
     };
     if(reloadKey != 0){fetchData();}
   }, [dispatch,reloadKey]);
-
-  
   const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};
-  
- 
-
   if (isLoading){
     return <Spinner/>
  }else{

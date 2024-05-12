@@ -5,6 +5,7 @@ export const CLEAR_ERRORS = 'CLEAR_ERRORS'
 //ALL
 export const SUCCESS = 'SUCCESS'
 export const FAIL = 'FAIL'
+export const CLEAR_MSG = 'CLEAR_MSG'
 
 //ALL
 export const LOADED = 'LOADED'

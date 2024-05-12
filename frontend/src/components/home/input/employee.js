@@ -214,8 +214,7 @@ const content = (
   // };
 
   
-
-  const renderBankDetails = () => {
+const renderBankDetails = () => {
     if (userData.payment === '2') {
       return (
 

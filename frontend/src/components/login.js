@@ -6,6 +6,7 @@ import { LockOutlined, MailOutlined } from "@ant-design/icons";
 import {post_data} from '../actions/all'
 import { useDispatch,useSelector  } from 'react-redux';
 import { Navigate } from "react-router-dom";
+import {clearError } from '../actions/error'
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
 const { Text, Title, Link } = Typography;
@@ -16,16 +17,34 @@ export default function App() {
   const dispatch = useDispatch()
   // const { isLoading, isAuthenticated } = useSelector(state => state.auth); // Assuming your reducer is named authReducer
   // console.log(isAuthenticated);
-  const { isLoading, isAuthenticated, error } = useSelector(state => ({
+  const { isLoading, isAuthenticated, error,msg } = useSelector(state => ({
     isLoading: state.auth.isLoading,
     isAuthenticated: state.auth.isAuthenticated,
-    error: state.error.msg.msg
+    error: state.error.msg,
+    msg:state.auth.msg
 }));
   
   const onFinish = async (values) => {
-     await post_data('SUCCESS',values, '/user/login', 'SUCCESS')(dispatch)
+    dispatch({type:'AUTH_LOADING'});
+    await post_data('SUCCESS',values, '/user/login', 'SUCCESS')(dispatch)
   };
-
+  useEffect(() => {
+    let timeoutId;
+      if (error!=null) {
+        timeoutId = setTimeout(() => {
+            dispatch(clearError());
+        }, 3000);
+    }
+    if (msg!=null) {
+  //         dispatch({type:'CLEAR_AUTH'});
+  //     navigate('/');
+  }
+    return () => {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+    };
+  }, [msg, error,dispatch]);
 
   const styles = {
     container: {
@@ -61,7 +80,7 @@ export default function App() {
         <Card className="shadow" style={{ width: '22rem', background: 'transparent'}}>
             <div style={styles.header}>
 
-           {error ? <Alert message={error} type="error" />:null}
+           {error && Object.keys(error).length > 0   ? <Alert message={error} type="error" />:null}
            {isAuthenticated && (<Navigate to="/dashboard" replace={true} />)}
               <Title style={styles.title}>Log In</Title>
             </div>

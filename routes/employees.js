@@ -90,7 +90,7 @@ router.post("/", async (req, res) => {
               ]
           );
           await client.query('COMMIT');
-          res.status(200).json(response.rows[0]);
+          res.status(200).json({data:response.rows[0]});
         } catch (error) {
           await client.query('ROLLBACK');
           // console.error(error.stack);
@@ -115,6 +115,7 @@ router.get("/", async (req,res)=>{
       if (err) {
         console.log(err.stack);
       } else {
+        console.log(response.rows);
         res.status(200).json(response.rows);
       }
     });

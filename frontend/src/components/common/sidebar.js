@@ -1,7 +1,11 @@
 import { Flex, Box, VStack, Text, IconButton, Divider } from '@chakra-ui/react';
 import { RiCloseLine } from 'react-icons/ri';
-
+import {useSelector} from 'react-redux';
 const Sidebar = ({ onClose }) => {
+  const {  user } = useSelector(state => ({
+    user: state.auth.user,
+    // error: state.error.msg
+}));
   return (
     <Box
       pos="fixed"

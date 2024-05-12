@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import {thunk} from 'redux-thunk'; 
 import rootReducer from './reducers';
-
+import { persistStore } from 'redux-persist';
 const persistedState = localStorage.getItem('reduxState') 
   ? JSON.parse(localStorage.getItem('reduxState'))
   : {};
@@ -21,6 +21,7 @@ const store = createStore(
 store.subscribe(() => {
   localStorage.setItem('reduxState', JSON.stringify(store.getState()));
 });
+const persistor = persistStore(store); 
 
-export { store };
+export { store,persistor };
 

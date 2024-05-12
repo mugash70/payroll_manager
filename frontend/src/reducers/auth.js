@@ -1,10 +1,11 @@
-import {AUTH_LOADING,CLEAR_AUTH,SUCCESS,FAIL} from '../actions/types'
+import {CLEAR_MSG,AUTH_LOADING,CLEAR_AUTH,SUCCESS,FAIL} from '../actions/types'
 
 var initialState = {
     token: localStorage.getItem('token'),
-    isAuthenticated: null,
+    isAuthenticated: false,
     user: null,
-    isLoading:true,
+    isLoading:false,
+    msg: null,
    
 }
 
@@ -13,20 +14,23 @@ export default function Authreducer(state = initialState, action) {
         case AUTH_LOADING:
             return {
                 ...state,
+                isLoading:true,
                  [action.dataType]: {
                   ...state[action.dataType],
-                  data: action.payload,
-    
+                  data: action.payload
                 },
             }
         case SUCCESS:
+            if (!action.payload) {return state}
             localStorage.setItem('token', action.payload.token)
+            const { user, msg } = action.payload || {};
             return {
                 ...state,
                 ...action.payload,
                 isLoading: false,
                 isAuthenticated: true,
-                user: action.payload
+                user: user,
+                msg: msg || '',
             }
         case FAIL:
             localStorage.removeItem('token');
@@ -38,8 +42,10 @@ export default function Authreducer(state = initialState, action) {
                 isLoading: false,
                 user: null
             }
+       
         case CLEAR_AUTH:
           localStorage.clear();
+    
           return initialState
         default:
             {

@@ -93,9 +93,14 @@ const handleDel= async (dept_id)=>{
     console.error(err);
   }
 }
-const employeeData = useSelector((state) =>  state.all.employees.data);
-const isLoading = useSelector((state) =>  state.all.isLoading);
-const error = useSelector((state) => state.error.id);
+
+const {employeeData,isLoading,error} = useSelector((state) =>({ 
+  employeeData: state.all.employees.data,
+  isLoading:state.all.isLoading,
+  error:state.error.msg,
+
+}));
+
 
 const dispatch = useDispatch()
 

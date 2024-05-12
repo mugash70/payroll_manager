@@ -11,23 +11,33 @@ const crypto = require('crypto');
 app.post("/login", async (req, res, next) => {
     try {
       const { email,password } = req.body;
-      await pool.query(`SELECT * FROM users WHERE email = $1`, [email], (err, response) => {
+      await pool.query(`SELECT * FROM users WHERE email = $1`, [email], async (err, response) => {
         validateUser(email,password);
+      
+   
         if (err) {console.log(err.stack)} else {
-          if (response.rows.length === 0) {res.status(400).json({ msg: "user not found" });}
+          if (response.rows.length === 0) {res.status(400).json({ msg: "user not found" })}
+          
           else if (response.rows[0].length != 0) {
-            const token = jwt.sign({ userId:response.rows[0].emp_id }, process.env.JWTSTUFF, 
-              // {expiresIn: '1h',}
-              );
+            const isPasswordMatch = await bcrypt.compare(password, response.rows[0].password);
+        
+            if(isPasswordMatch){
+            const token = jwt.sign({ userId:response.rows[0].emp_id }, process.env.JWTSTUFF);
 
             res.status(200).json({
               token, user: response.rows[0]
             });
+          }else{
+            res.status(401).json({ msg: "Wrong password" })
           }
+           
+          }
+
         }
       });
     }
     catch (error) {
+      res.status(500).json({ msg: "Error logging in" })
       console.log(error);
     }
   });
@@ -76,21 +86,22 @@ app.post('/forgot', async (req, res) => {
 
 app.post('/reset-password', async (req, res) => {
   try {
-    const { email, oldPassword, newPassword, confirmPassword } = req.body;
-    if (newPassword !== confirmPassword) {
-        return res.status(400).send('your New password and Confirm password must match');
+    const { email, old_password, new_password, c_new_password } = req.body;
+    if (new_password !== c_new_password) {
+        return res.status(400).send('New password and Confirm password must match');
     }
     const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (user.rows.length === 0) {
         return res.status(404).send('User not found');
     }
-    const isPasswordMatch = await bcrypt.compare(oldPassword, user.rows[0].password);
+
+    const isPasswordMatch = await bcrypt.compare(old_password, user.rows[0].password);
     if (!isPasswordMatch) {
         return res.status(401).send('Incorrect old password');
     }
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(new_password, 10);
     await pool.query('UPDATE users SET password = $1 WHERE email = $2', [hashedPassword, email]);
-    res.status(200).send('Password updated successfully');
+    res.status(200).send({msg:'Password updated successfully'});
 } catch (error) {
     console.error(error);
     res.status(500).send('Internal server error');

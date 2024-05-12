@@ -1,21 +1,51 @@
-import React from "react";
+import React,{useEffect} from "react";
 
-import { Button, Form, Grid, Input, theme, Typography,Card } from "antd";
+import { Button, Form, Grid, Input, Alert,theme, Typography,Card } from "antd";
 import Animate from './default/animate'
-import { LockOutlined } from "@ant-design/icons";
+import { LockOutlined,MailOutlined} from "@ant-design/icons";
 import {post_data} from '../actions/all'
-import { useDispatch} from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
+import {clearError } from '../actions/error'
+import { useNavigate } from "react-router-dom";
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
 const { Title } = Typography;
 
+
 export default function App() {
+  const navigate = useNavigate();
   const { token } = useToken();
   const screens = useBreakpoint();
   const dispatch = useDispatch()
+  const { isLoading,msg,error } = useSelector(state => ({
+    isLoading: state.auth.isLoading,
+    error: state.error.msg,
+    msg:state.auth.msg
+}));
+
+useEffect(() => {
+  let timeoutId;
+    if (error!=null) {
+      timeoutId = setTimeout(() => {
+          dispatch(clearError());
+      }, 3000);
+  }
+  if (msg!=null) {
+        dispatch({type:'CLEAR_AUTH'});
+    navigate('/');
+}
+  return () => {
+      if (timeoutId) {
+          clearTimeout(timeoutId);
+      }
+  };
+}, [msg, error,dispatch,navigate]);
+
+
+
   const onFinish = async(values) => {
-    await post_data('SUCCESS',values, '/user/reset', 'SUCCESS')(dispatch)
-  
+    dispatch({type:'AUTH_LOADING'});
+    await post_data('SUCCESS',values, '/user/reset-password', 'SUCCESS')(dispatch)
   };
 
   const styles = {
@@ -50,10 +80,12 @@ export default function App() {
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',marginTop:'-5%' }}>
         <Card className="shadow" style={{ width: '22rem', background: 'transparent'}}>
             <div style={styles.header}>
-              <Title style={styles.title}>Reset Password</Title>
+            {error && Object.keys(error).length > 0  ?<Alert message={error} type="error" />:null}
+            {msg && Object.keys(msg).length > 0 ?<Alert message={msg} type="success" />:null}
+             <Title style={styles.title}>Reset Password</Title>
             </div>
                               <Form name="normal_login" initialValues={{remember: true,}} onFinish={onFinish} layout="vertical"requiredMark="optional">
-                                {/* <Form.Item name="email"
+                               <Form.Item name="email"
                                   rules={[ {
                                       type: "email",
                                       required: true,
@@ -65,7 +97,7 @@ export default function App() {
                                     prefix={<MailOutlined />}
                                     placeholder="Email"
                                   />
-                                </Form.Item> */}
+                                </Form.Item>
                                 <Form.Item
                                   name="old_password"
                                   rules={[

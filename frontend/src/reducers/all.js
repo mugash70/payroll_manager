@@ -1,4 +1,4 @@
-import {LOADED,LOADED_FAIL,CLEAR_ALL,SET_LOADING,UPDATED,ADDED,DELETED} from '../actions/types'
+import {CLEAR_MSG,LOADED,LOADED_FAIL,CLEAR_ALL,SET_LOADING,UPDATED,ADDED,DELETED} from '../actions/types'
 
 
 var initialState = {
@@ -11,6 +11,8 @@ var initialState = {
     employees:[],
     transactions:[],
     transactionscompleted:[],
+    msg:null,
+
 }
 export default function Allreducer(state = initialState, action) {
     switch (action.type) {
@@ -20,7 +22,7 @@ export default function Allreducer(state = initialState, action) {
           isLoading: action.isLoading,
         };
       case LOADED:
-        const newData = Array.isArray(action.payload) ? action.payload : [];
+        // const newData = Array.isArray(action.payload) ? action.payload : [];
         return {
           ...state,
           [action.dataType]: {
@@ -39,15 +41,28 @@ export default function Allreducer(state = initialState, action) {
             data: updatedDataAfterDelete,
           },
         };
-      case ADDED:
-        const addedItem = action.payload;
-        return {
-          ...state,
-          [action.dataType]: {
-            ...state[action.dataType],
-            data: [...state[action.dataType].data, addedItem],
-          },
-        };
+        case ADDED:
+          const { data, msg } = action.payload || {};
+          const currentData = state[action.dataType]?.data || [];
+          const newData = data ? [...currentData, data] : currentData;
+          return {
+              ...state,
+              [action.dataType]: {
+                  ...state[action.dataType],
+                  data: newData,
+              },
+              msg: msg || '',
+          };
+    
+        // const addedItem = action.payload;
+        // return {
+        //   ...state,
+        //   [action.dataType]: {
+        //     ...state[action.dataType],
+        //     data: [...(state[action.dataType].data || []), addedItem],
+        //   },
+        //   msg: action.payload.msg || '',
+        // };
 
       case UPDATED:
         const updatedItem = action.payload;
@@ -69,6 +84,7 @@ export default function Allreducer(state = initialState, action) {
           },
           isLoading: false,
         };
+  
       case CLEAR_ALL:
         return {initialState};
       default:

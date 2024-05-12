@@ -10,15 +10,17 @@ router.post("/", async (req, res) => {
     try {
 
       await client.query('BEGIN');
-      var id = generateRandomNumber('O')
-      let {org_name,logo,email, phone,ent} = req.body;
+      var ent_id = generateRandomNumber('E')
+      let {ent_name,org_id} = req.body;
+
         try {  
-          await client.query(
-            `INSERT INTO "entities" (org_name,logo,email, phone,"Has_entity","Organization_id") VALUES($1, $2, $3, $4,$5,$6) RETURNING *`,
-            [org_name,logo,email, phone,ent,id]
+          var response = await client.query(
+            `INSERT INTO "entities" (ent_id,ent_name,org_id) VALUES($1, $2,$3) RETURNING *`,
+            [ent_id,ent_name,org_id]
           );
-          await client.query('COMMIT');
-          res.json("created successfully!");
+           await client.query('COMMIT');
+      
+          res.status(200).json({data:response.rows[0]});
         } catch (error) {
           await client.query('ROLLBACK');
           console.error(error.message);
@@ -68,56 +70,109 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
-
 router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  // const { ent_name, account_type, bankaccountno, bankbranch, bankname, email, payment, payment_period, phone } = req.body;
   const client = await pool.connect();
+
   try {
     await client.query('BEGIN');
-    const org_id = req.params.id;
-    const { org_name, logo, email, phone, ent} = req.body;
-
+    const updates = [];
     const updateValues = [];
     const updateFields = [];
-    if (org_name) {
-      updateValues.push(org_name);
-      updateFields.push('org_name = $' + updateValues.length);
+    for (const [key, value] of Object.entries(req.body)) {
+      if (key !== 'ent_id' && value) {
+        updates.push(`${key} = $${updates.length + 1}`);
+        updateValues.push(value);
+      }
     }
-    if (logo) {
-      updateValues.push(logo);
-      updateFields.push('logo = $' + updateValues.length);
+    if (updates.length === 0) {
+      return res.status(400).json({ msg: 'No valid fields to update' });
     }
-    if (email) {
-      updateValues.push(email);
-      updateFields.push('email = $' + updateValues.length);
-    }
-    if (phone) {
-      updateValues.push(phone);
-      updateFields.push('phone = $' + updateValues.length);
-    }
+    const updateQuery = `UPDATE entities SET ${updates.join(', ')} WHERE ent_id = '${id}' RETURNING *`;
+    const values = [...updateValues];
+    const { rows } = await client.query(updateQuery, values);
+    await client.query('COMMIT');
 
-     if (ent) {
-     updateValues.push(ent);
-       updateFields.push('"Has_entity" = $' + updateValues.length);
-     }
-    const updateQuery = `UPDATE "entities" SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
-    const values = updateValues.concat(org_id);
-    const response = await client.query(updateQuery, values);
-    if (response.rows.length > 0) {
-      await client.query('COMMIT');
-      res.json('Successfully updated');
+    if (rows.length > 0) {
+      res.json({ data: rows[0], msg: 'Successfully updated' });
     } else {
-      await client.query('ROLLBACK');
-      res.status(404).json('Organization not found');
+      res.status(404).json({ msg: 'Entity not found' });
     }
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error(error.message);
-    res.status(500).json('Error occurred while updating organization');
+    console.error('Error occurred:', error);
+    res.status(500).json({ msg: 'Error occurred while updating Entity' });
   } finally {
     client.release();
   }
 });
+
+
+// router.put('/:id', async (req, res) => {
+//   const client = await pool.connect();
+//   try {
+//     await client.query('BEGIN');
+//     const ent_id = req.params.id;
+//     const { ent_name,account_type,bankaccountno,bankbranch,bankname,email,org_id,payment,payment_period,phone} = req.body;
+
+//     const updateValues = [];
+//     const updateFields = [];
+//     if (ent_name) {
+//       updateValues.push(ent_name);
+//       updateFields.push('"ent_name" = $' + updateValues.length);
+//     }
+//     if (account_type) {
+//       updateValues.push(account_type);
+//       updateFields.push('"account_type" = $' + updateValues.length);
+//     }
+//     if (bankaccountno) {
+//       updateValues.push(bankaccountno);
+//       updateFields.push('"bankaccountno" = $' + updateValues.length);
+//     }
+//     if (bankbranch) {
+//       updateValues.push(bankbranch);
+//       updateFields.push('"bankbranch" = $' + updateValues.length);
+//     }
+//     if (bankname) {
+//       updateValues.push(bankname);
+//       updateFields.push('"bankname" = $' + updateValues.length);
+//     }
+//     if (email) {
+//       updateValues.push(email);
+//       updateFields.push('"email" = $' + updateValues.length);
+//     }
+//     if (payment) {
+//       updateValues.push(payment);
+//       updateFields.push('"payment" = $' + updateValues.length);
+//     }
+//     if (payment_period) {
+//       updateValues.push(payment_period);
+//       updateFields.push('"payment_period" = $' + updateValues.length);
+//     }
+//     if (phone) {
+//       updateValues.push(phone);
+//       updateFields.push('"phone" = $' + updateValues.length);
+//     }
+
+//     const updateQuery = `UPDATE "entities" SET ${updateFields.join(', ')} WHERE "ent_id" = $${updateValues.length + 1} RETURNING *`;
+//     const values = updateValues.concat(ent_id);
+//     const response = await client.query(updateQuery, values);
+//     if (response.rows.length > 0) {
+//       await client.query('COMMIT');
+//       res.json({data:response.rows[0],msg:'Successfully updated'});
+//     } else {
+//       await client.query('ROLLBACK');
+//       res.status(404).json('Entity not found');
+//     }
+//   } catch (error) {
+//     await client.query('ROLLBACK');
+//     console.error(error.message);
+//     res.status(500).json('Error occurred while updating Entity');
+//   } finally {
+//     client.release();
+//   }
+// });
 
 
 
@@ -159,7 +214,7 @@ router.post("/ent/departments", async (req, res) => {
         await client.query('COMMIT');
         // res.json("created successfully!");
         const insertedData = result.rows[0];
-        res.json(insertedData);
+        res.json({data:insertedData});
       } catch (error) {
         await client.query('ROLLBACK');
         console.error(error.stack);
@@ -202,7 +257,7 @@ await pool.query(query, (err, response) => {
     if (err) {
       console.log(err.stack)
     } else {
-      res.status(200).json(response.rows);
+      res.status(200).json({data:response.rows});
     }
   });
 });
@@ -230,7 +285,7 @@ router.post("/ent/adjustments", async (req, res) => {
         await client.query('COMMIT');
         // res.json("created successfully!");
         const insertedData = result.rows[0];
-        res.json(insertedData);
+        res.json({data:insertedData});
       } catch (error) {
         await client.query('ROLLBACK');
         console.error(error.stack);
@@ -258,8 +313,7 @@ router.get("/ent/adjustments", async (req,res)=>{
   catch(error) {
     console.log(error);
   }
-}  
-)
+})
 
 router.delete("/ent/adjustments/:id", async (req, res) => {
   const query = {
@@ -272,7 +326,7 @@ await pool.query(query, (err, response) => {
     if (err) {
       console.log(err.stack)
     } else {
-      res.status(200).json(response.rows);
+      res.status(200).json({data:response.rows});
     }
   });
 });

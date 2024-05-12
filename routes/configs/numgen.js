@@ -1,9 +1,6 @@
-module.exports = generateRandomNumber=(Start)=> {
-    const min = 1000000000;
-    const max = 9999999999;
-    let randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
-    let randomNumberString = Start + randomNumber.toString().slice(1);
+module.exports = generateRandomNumber = (StartAlphabet) => {
+  const timestamp = Date.now().toString(); // Get current timestamp
+  const randomNumberString = StartAlphabet + timestamp.slice(1); // Concatenate with StartAlphabet
 
-    return randomNumberString;
-  }
- 
+  return randomNumberString;
+}

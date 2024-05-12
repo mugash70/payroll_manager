@@ -3,7 +3,7 @@ import { useDispatch,useSelector  } from 'react-redux';
 import { Table,Button,Row,Col } from 'antd';
 import Layoutx  from '../../default/layout';
 
-import Grad from '../../home/input/grades'
+import Roles from '../../home/input/grades'
 import {useReloadKey} from '../../default/index'
 import Spinner from '../../default/spinner';
 import Confrim from '../../default/confrim'
@@ -40,12 +40,13 @@ const columns = [
     dataIndex: 'salary',
     defaultSortOrder: 'descend',
     sorter: (a, b) => a.salaray - b.salaray,
-    width: '40%',
+    width: '25%',
   },
   {
-    title: 'payment_period',
+    title: 'payment Frequency',
     dataIndex: 'payment_period',
     defaultSortOrder: 'descend',
+    width: '20%',
     sorter: (a, b) => a.payment_period - b.payment_period,
   },
   {title: 'Action',
@@ -54,7 +55,7 @@ const columns = [
     <div style={{ marginLeft: 'auto' }}>
       <Row gutter={[20]}>
         <Col>
-        {<Grad  key={record.grade_id} record={record} type="update"/>}
+        {<Roles  key={record.grade_id} record={record} type="update"/>}
         </Col>
         <Col>      
         {<Confrim  msg ={'Are sure you want ot delete the Department ?'}
@@ -97,5 +98,5 @@ if (isLoading){
 }
 }
 
-const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={RoleDash} Buttons={Grad} />;
+const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={RoleDash} Buttons={Roles} />;
 export default Home;
