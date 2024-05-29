@@ -22,11 +22,8 @@ const RoleRoute = require("./routes/role")
 const ReportsRoute = require("./routes/report")
 const BDRoute = require("./routes/employees")
 
-// const EmpRoute = require("./routes/employees")
-
 //middleware
 app.use(cors());
-
 
 //session
 var Oneday= 1000*60*60*24
@@ -48,11 +45,15 @@ app.use('/employees', EmpRoute);
 app.use('/entity', EntRoute);
 app.use('/grades', GrRoute);
 
-app.use(express.static(path.join(__dirname, 'frontend/build')));
+
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'frontend/build')));
+}else{
+  app.use(express.static(path.join(__dirname, 'frontend/build')));
 }
-
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
+});
 
 app.use(cookieP())
 

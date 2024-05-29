@@ -26,7 +26,7 @@ export default function App() {
   
   const onFinish = async (values) => {
     dispatch({type:'AUTH_LOADING'});
-    await post_data('SUCCESS',values, '/user/login', 'SUCCESS')(dispatch)
+    await post_data('SUCCESS',values, 'user/login', 'SUCCESS')(dispatch)
   };
   useEffect(() => {
     let timeoutId;
@@ -81,7 +81,7 @@ export default function App() {
             <div style={styles.header}>
 
            {error && Object.keys(error).length > 0   ? <Alert message={error} type="error" />:null}
-           {isAuthenticated && (<Navigate to="/dashboard" replace={true} />)}
+           {isAuthenticated ? (<Navigate to="/dashboard" replace={true} />): null }
               <Title style={styles.title}>Log In</Title>
             </div>
                               <Form name="normal_login" initialValues={{remember: true,}} onFinish={onFinish} layout="vertical"requiredMark="optional">

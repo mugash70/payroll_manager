@@ -10,13 +10,14 @@ const crypto = require('crypto');
 
 app.post("/login", async (req, res, next) => {
     try {
-      const { email,password } = req.body;
-      await pool.query(`SELECT * FROM users WHERE email = $1`, [email], async (err, response) => {
+      let  { email,password } = req.body;
+      email = email.toLowerCase();
+      await pool.query(`SELECT * FROM users WHERE LOWER(email) = $1`, [email], async (err, response) => {
         validateUser(email,password);
       
    
         if (err) {console.log(err.stack)} else {
-          if (response.rows.length === 0) {res.status(400).json({ msg: "user not found" })}
+          if (response.rows.length === 0) {res.status(400).json("user not found")}
           
           else if (response.rows[0].length != 0) {
             const isPasswordMatch = await bcrypt.compare(password, response.rows[0].password);
@@ -28,7 +29,7 @@ app.post("/login", async (req, res, next) => {
               token, user: response.rows[0]
             });
           }else{
-            res.status(401).json({ msg: "Wrong password" })
+            res.status(401).json("Wrong password")
           }
            
           }
@@ -37,7 +38,7 @@ app.post("/login", async (req, res, next) => {
       });
     }
     catch (error) {
-      res.status(500).json({ msg: "Error logging in" })
+      res.status(500).json("Error logging in")
       console.log(error);
     }
   });
@@ -121,9 +122,15 @@ const validateUser = (email,password) => {
     const userEmail = typeof email === 'string' && email.trim() != '';
     const userPassword = typeof password === 'string' && password.trim() != '';
     if (userEmail) {return userEmail}
-    else {next(new Error({ msg: "Invalid user" }));}
-    if (userPassword) {return userPassword}
-    else {next(new Error({ msg: "Invalid user" }));}
+    else {
+      next(new Error("Invalid user"))
+    }
+    if (userPassword) {
+      return userPassword
+    }
+    else {
+      next(new Error("Invalid user"))
+  }
 }
 
 module.exports = app;
