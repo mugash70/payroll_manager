@@ -22,6 +22,7 @@ return(
           hoverable
           bordered={true}
           className="dashboard-card"
+          style={{backgroundColor:'#d9d9d9'}}
         >
           <Row align="middle">
             <Col xs={24} sm={12} md={8} lg={6} xl={4}>
@@ -41,6 +42,7 @@ return(
           hoverable
           bordered={true}
           className="dashboard-card"
+          style={{backgroundColor:'#d9d9d9'}}
         >
           <Row align="middle">
             <Col xs={24} sm={12} md={8} lg={6} xl={4}>
@@ -60,6 +62,7 @@ return(
           hoverable
           bordered={true}
           className="dashboard-card"
+          style={{backgroundColor:'#d9d9d9'}}
         >
           <Row align="middle">
             <Col xs={24} sm={12} md={8} lg={6} xl={4}>
@@ -79,6 +82,8 @@ return(
           hoverable
           bordered={true}
           className="dashboard-card"
+          style={{backgroundColor:'#d9d9d9'}}
+          shadow
         >
           <Row align="middle">
             <Col xs={24} sm={12} md={8} lg={6} xl={4}>
