@@ -13,10 +13,11 @@ const breadcrumbs = ['dashboard','adjustments'];
 const Deddash = () => {
 const {reloadKey, handleReload} = useReloadKey();
 const dispatch = useDispatch()
-const {deductionData,isLoading,error} = useSelector((state) =>({ 
+const {deductionData,isLoading,error,user_selection} = useSelector((state) =>({ 
   deductionData: state.all.adjustments.data,
   isLoading:state.all.isLoading,
   error:state.error.msg,
+  user_selection:state.user_selection,
 
 }));
 
@@ -106,7 +107,7 @@ const handleDel= async (adj_id)=>{
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await get_data('/entity/ent/adjustments', 'adjustments')(dispatch); 
+        await get_data( `/entity/ent/adjustments/${user_selection.ent_id}`, 'adjustments')(dispatch); 
       } catch (err) {
         console.error(err);
       }

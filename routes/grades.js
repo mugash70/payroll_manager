@@ -12,11 +12,11 @@ router.post("/", async (req, res) => {
       await client.query('BEGIN');
       var id = generateRandomNumber('D')
  
-      let {grade_name,salary,payment_period, phone,ent} = req.body;
+      let {grade_name,salary,payment_period, phone,ent_id} = req.body;
         try {  
          const result = await client.query(
-            `INSERT INTO grades (grade_name,salary,payment_period) VALUES($1, $2, $3) RETURNING *`,
-            [grade_name,salary,payment_period]
+            `INSERT INTO grades (grade_name,salary,payment_period,ent_id) VALUES($1, $2, $3,$4) RETURNING *`,
+            [grade_name,salary,payment_period,ent_id]
           );
           await client.query('COMMIT');
           res.json(result.rows);
@@ -45,30 +45,47 @@ router.get("/", async (req,res)=>{
       }
     });
   }
-  catch {
+  catch(error)  {
     console.log(error);
   }
 }  
 )
 
-
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
-    const response = await client.query('SELECT * FROM grades WHERE "Organization_id" = $1', [id]);
-    const organization = response.rows[0];
-    res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
-    await client.query('COMMIT');
-  } catch (error) {
-    await client.query('ROLLBACK');
-    console.error(error.message);
-    res.status(500).json('Error occurred while fetching organization information');
-  } finally {
-    client.release();
+    await pool.query(`SELECT * from grades WHERE ent_id = '${id}'`, (err, response) => {
+      if (err) {
+        console.log(err.stack);
+        res.status(500).json("Error Fetching!");
+      } else {
+        res.status(200).json(response.rows);
+      }
+    });
   }
-});
+  catch(error) {
+    console.log(error);
+  }
+}  
+)
+
+// router.get('/:id', async (req, res) => {
+//   const { id } = req.params;
+//   const client = await pool.connect();
+//   try {
+//     await client.query('BEGIN');
+//     const response = await client.query('SELECT * FROM grades WHERE "Organization_id" = $1', [id]);
+//     const organization = response.rows[0];
+//     res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
+//     await client.query('COMMIT');
+//   } catch (error) {
+//     await client.query('ROLLBACK');
+//     console.error(error.message);
+//     res.status(500).json('Error occurred while fetching organization information');
+//   } finally {
+//     client.release();
+//   }
+// });
 
 
 
@@ -125,7 +142,6 @@ router.put('/:id', async (req, res) => {
 
 // // delete route
 router.delete("/:id", async (req, res) => {
-  console.log(req.params.id);
   const query = {
     text: `DELETE FROM grades WHERE grade_id = $1 RETURNING *`,
     values: [req.params.id]

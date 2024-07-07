@@ -24,9 +24,13 @@ const handleDel= async (dept_id)=>{
 }}
 
 
-const departmentData = useSelector((state) =>  state.all.departments.data);
-const isLoading = useSelector((state) =>  state.all.isLoading);
-const error = useSelector((state) => state.error.id);
+
+const {departmentData,isLoading,error,user_selection} = useSelector((state) =>({ 
+  departmentData:state.all.departments.data,
+  isLoading:state.all.isLoading,
+  error:state.error.msg,
+  user_selection:state.user_selection,
+}));
 
   const columns = [
 
@@ -72,7 +76,7 @@ const error = useSelector((state) => state.error.id);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await get_data('/entity/ent/departments', 'departments')(dispatch); 
+        await get_data(`/entity/ent/departments/${user_selection.ent_id}`, 'departments')(dispatch); 
       } catch (err) {
         console.error(err);
       }

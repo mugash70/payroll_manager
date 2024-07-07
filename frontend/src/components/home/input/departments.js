@@ -48,8 +48,11 @@ const Departments = ({ type,record }) => {
  const showModal = () => {
     setOpen(true);
   };
+  const user_selection = useSelector((state) =>  state.user_selection);
+  
   const [deptData, setdeptData] = useState({
     dept_name:'',
+    ent_id:user_selection.ent_id,
  
   });
 
@@ -61,11 +64,12 @@ const Departments = ({ type,record }) => {
     }, [record]); 
 
   const dispatch = useDispatch()
+
   const  handleAddDept = async () => {
     try {
       await post_data('ADDED',deptData,'/entity/ent/departments','departments')(dispatch);
       setOpen(false);
-      setdeptData({})
+      // setdeptData({})
       handleReload()
     } catch (err) {
       console.error(err);

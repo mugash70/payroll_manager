@@ -113,9 +113,8 @@ router.get("/", async (req,res)=>{
     JOIN grades ON employees.grade_id  = grades.grade_id
     `, (err, response) => {
       if (err) {
-        console.log(err.stack);
+        res.status(500).json(err);
       } else {
-        console.log(response.rows);
         res.status(200).json(response.rows);
       }
     });
@@ -132,17 +131,15 @@ router.get('/:id', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const response = await client.query('SELECT employees.*, departments.dept_name FROM employees JOIN departments ON employees.dept_id  = departments.dept_id  WHERE employees.Organization_id = $1', [id]);
-    
-    // SELECT * FROM "employees" WHERE "Organization_id" = $1
-    // ', [id]);
-    const organization = response.rows[0];
-    res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
+    var q1 ="SELECT employees.*, departments.dept_name,grades.grade_name,grades.salary FROM employees JOIN departments ON employees.dept_id  = departments.dept_id JOIN grades ON employees.grade_id  = grades.grade_id where  employees.ent_id = $1"
+    const response = await client.query(q1, [id]);
+    console.log(response.rows);
+    res.status(200).json(response.rows);
     await client.query('COMMIT');
   } catch (error) {
     await client.query('ROLLBACK');
-    console.error(error.message);
-    res.status(500).json('Error occurred while fetching organization information');
+    console.error(error.stack);
+    res.status(500).json('Error occurred while fetching employees information');
   } finally {
     client.release();
   }

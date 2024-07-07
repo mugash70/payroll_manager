@@ -94,11 +94,11 @@ const handleDel= async (dept_id)=>{
   }
 }
 
-const {employeeData,isLoading,error} = useSelector((state) =>({ 
+const {employeeData,isLoading,error,user_selection} = useSelector((state) =>({ 
   employeeData: state.all.employees.data,
   isLoading:state.all.isLoading,
   error:state.error.msg,
-
+  user_selection:state.user_selection,
 }));
 
 
@@ -107,9 +107,9 @@ const dispatch = useDispatch()
 useEffect(() => {
     const fetchData = async () => {
       try {
-        await get_data('/employees', 'employees')(dispatch);
-        await get_data('/grades', 'grades')(dispatch);
-        await get_data('/entity/ent/departments', 'departments')(dispatch);        
+        await get_data(`/employees/${user_selection.ent_id}`, 'employees')(dispatch);
+        await get_data(`/grades/${user_selection.ent_id}`, 'grades')(dispatch);
+        await get_data(`/entity/ent/departments/${user_selection.ent_id}`, 'departments')(dispatch);        
       } catch (err) {
         console.error(err);
       }
@@ -117,15 +117,17 @@ useEffect(() => {
     if(reloadKey != 0){fetchData();}
   }, [dispatch,reloadKey]);
 
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
 
 if (isLoading){
    return <Spinner/>
+}else if (employeeData.length < 0) {
+
+  return <Table columns={columns} dataSource={[]} />;
 }else{
     return(<Table columns={columns} dataSource={employeeData} onChange={onChange} />)
 }
 };
-const Home = () => <Layoutx breadcrumsx={breadcrumbs} DashComponent={Employeedash} Buttons={Emp} />;
+// var titlex ='Greatint'
+
+const Home = () => <Layoutx breadcrumsx={breadcrumbs}  DashComponent={Employeedash} Buttons={Emp} />;
 export default Home;

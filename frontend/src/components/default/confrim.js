@@ -9,7 +9,7 @@ const Confrim = ({handleDelete,msg }) => (
     okText="Yes"
     cancelText="No"
     onConfirm={handleDelete}
-     ><Button danger >Delete</Button>
+     ><Button type='danger' >Delete</Button>
   </Popconfirm>
 );
 export default Confrim;

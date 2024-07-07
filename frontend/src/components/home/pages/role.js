@@ -14,11 +14,14 @@ const breadcrumbs = ['dashboard','roles'];
 const RoleDash = () =>{
 const {reloadKey, handleReload} = useReloadKey();
 const dispatch = useDispatch()
-const gradesData = useSelector((state) =>  state.all.grades.data);
-const isLoading = useSelector((state) =>  state.all.isLoading);
-const error = useSelector((state) => state.error.id);
 
 
+const {gradesData,isLoading,error,user_selection} = useSelector((state) =>({ 
+  gradesData: state.all.grades.data,
+  isLoading:state.all.isLoading,
+  error:state.error.msg,
+  user_selection:state.user_selection,
+}));
 
 const columns = [
   {
@@ -58,11 +61,8 @@ const columns = [
         {<Roles  key={record.grade_id} record={record} type="update"/>}
         </Col>
         <Col>      
-        {<Confrim  msg ={'Are sure you want ot delete the Department ?'}
-        // 
-         handleDelete={() =>handleDel(record.grade_id)} 
-        />}
-          </Col>
+        {<Confrim  msg ={'Are sure you want ot delete the Department ?'} handleDelete={() =>handleDel(record.grade_id)} />}
+        </Col>
       </Row>
       </div>
   ),
@@ -77,7 +77,7 @@ useEffect(() => {
 
   const fetchData = async () => {
     try {
-      await get_data('/grades', 'grades')(dispatch);   
+      await get_data(`/grades/${user_selection.ent_id}`, 'grades')(dispatch);   
     } catch (err) {
       console.error(err);
     }

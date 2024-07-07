@@ -39,6 +39,7 @@ const Employee = ({ type,record }) => {
 
   const gradeData = useSelector((state) => state.all.grades.data);
   const deptData = useSelector((state) => state.all.departments.data);
+  const user_selection = useSelector((state) =>  state.user_selection);
   
   const jobs =useSelector((state) =>  state.all.employees.data);
 
@@ -60,7 +61,7 @@ const Employee = ({ type,record }) => {
     const selectedGradeId = parseInt(event);
     const grade = gradeData.find(grade => grade.grade_id === selectedGradeId);
     setSelectedGrade(grade);
-    setUserData({ ...userData, grade: grade.grade_id, grade_id: grade.grade_id, jobs: '',salary: grade.salary });
+    setUserData({ ...userData, grade: grade.grade_id, grade_id: grade.grade_id, jobs: '',salary: grade.salary,ent_id:user_selection.ent_id});
   };
 
   const handleContractChange = (event) => {
@@ -97,6 +98,7 @@ useEffect(() => {
       bankbranch: record.bank_branch,
       bankname: record.bank_name,
       bankaccountno: record.account_no,
+      ent_id:user_selection.ent_id
     });
   }
 }, [record]); 

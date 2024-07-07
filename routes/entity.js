@@ -37,7 +37,11 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req,res)=>{
   try {
-    await pool.query(`SELECT * from "entities"`, (err, response) => {
+    await pool.query(`SELECT e.*, p.*, pp.*
+      FROM "entities" e
+      LEFT JOIN "payments" p ON CAST(e.payment AS INTEGER) = p.pay_id
+      LEFT JOIN "frequency" pp ON CAST(e.payment_period AS INTEGER) = pp.freq_id ORDER BY e.created_at ASC;
+      `, (err, response) => {
       if (err) {
         console.log(err.stack);
       } else {
@@ -45,30 +49,35 @@ router.get("/", async (req,res)=>{
       }
     });
   }
-  catch {
+  catch(error) {
+    console.log(error);
+  }
+}  
+)
+router.get('/:id', async (req,res)=>{
+  const { id } = req.params;
+  try {
+    await pool.query(`SELECT e.*, p.*, pp.*
+      FROM "entities" e
+      LEFT JOIN "payments" p ON CAST(e.payment AS INTEGER) = p.pay_id
+      LEFT JOIN "frequency" pp ON CAST(e.payment_period AS INTEGER) = pp.freq_id 
+      WHERE "org_id" = ${id}
+      ORDER BY e.created_at ASC;
+      `, (err, response) => {
+      if (err) {
+        console.log(err.stack);
+      } else {
+        res.status(200).json(response.rows);
+      }
+    });
+  }
+  catch(error) {
     console.log(error);
   }
 }  
 )
 
 
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-    const response = await client.query('SELECT * FROM "entities" WHERE "Organization_id" = $1', [id]);
-    const organization = response.rows[0];
-    res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
-    await client.query('COMMIT');
-  } catch (error) {
-    await client.query('ROLLBACK');
-    console.error(error.message);
-    res.status(500).json('Error occurred while fetching organization information');
-  } finally {
-    client.release();
-  }
-});
 
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
@@ -180,10 +189,9 @@ router.put('/:id', async (req, res) => {
 router.delete("/:id", async (req, res) => {
 
   const query = {
-    text: `DELETE FROM "entities" WHERE "Organization_id" = $1 RETURNING *`,
+    text: `DELETE FROM "entities" WHERE "ent_id" = $1 RETURNING *`,
     values: [req.params.id]
   }
-
   // callback
   await pool.query(query, (err, response) => {
     if (err) {
@@ -245,7 +253,22 @@ router.get("/ent/departments", async (req,res)=>{
   }
 }  
 )
-
+router.get("/ent/departments/:id", async (req,res)=>{
+  const { id } = req.params;
+  try {
+    await pool.query(`SELECT * from departments where ent_id = '${id}'`, (err, response) => {
+      if (err) {
+        console.log(err.stack);
+      } else {
+        res.status(200).json(response.rows);
+      }
+    });
+  }
+  catch(error) {
+    console.log(error);
+  }
+}  
+)
 router.delete("/ent/departments/:id", async (req, res) => {
   const query = {
     text: `DELETE FROM departments WHERE "dept_id" = $1 RETURNING *`,
@@ -273,13 +296,13 @@ router.post("/ent/adjustments", async (req, res) => {
 
     await client.query('BEGIN');
     var id = generateRandomNumber('BD')
-    let {adj_name,adjust_type,amount,amount_type,payment_period,xfrom,xto} = req.body;
+    let {adj_name,adjust_type,amount,amount_type,payment_period,ent_id,xfrom,xto} = req.body;
 
       try {  
         const result = await client.query(
-          `INSERT INTO adjustments (adj_name, adj_type, amount, amount_type, period, "from", "to") 
-           VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-          [adj_name, adjust_type, amount, amount_type, payment_period, xfrom, xto]
+          `INSERT INTO adjustments (adj_name, adj_type, amount, amount_type, period,ent_id, "from", "to") 
+           VALUES ($1, $2, $3, $4, $5, $6, $7,$8) RETURNING *`,
+          [adj_name, adjust_type, amount, amount_type, payment_period,ent_id, xfrom, xto]
         );
         
         await client.query('COMMIT');
@@ -314,6 +337,22 @@ router.get("/ent/adjustments", async (req,res)=>{
     console.log(error);
   }
 })
+
+router.get("/ent/adjustments/:id", async (req,res)=>{
+  try {
+    await pool.query(`SELECT * from adjustments where ent_id = '${req.params.id}'`, (err, response) => {
+      if (err) {
+        console.log(err.stack);
+      } else {
+        res.status(200).json(response.rows);
+      }
+    });
+  }
+  catch(error) {
+    console.log(error);
+  }
+})
+
 
 router.delete("/ent/adjustments/:id", async (req, res) => {
   const query = {

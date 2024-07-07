@@ -37,6 +37,8 @@ const Roles = ({ type,record }) => {
   const { reloadKey, handleReload } = useReloadKey();
   const [open, setOpen] = useState(false);
   const [disabled, setDisabled] = useState(true);
+  
+  const dispatch = useDispatch()
   const [bounds, setBounds] = useState({
     left: 0,
     top: 0,
@@ -44,11 +46,13 @@ const Roles = ({ type,record }) => {
     right: 0,
   });
   const draggleRef = useRef(null);
+  const user_selection = useSelector((state) =>  state.user_selection);
  const showModal = () => {
     setOpen(true);
   };
   const [gradeData, setgradeData] = useState({
     // grade_name:'',
+    ent_id:user_selection.ent_id,
  
   });
 
@@ -58,21 +62,23 @@ const Roles = ({ type,record }) => {
             grade_name: record.grade_name,
             salary: record.salary,
             payment_period: record.payment_period,
+            ent_id:user_selection.ent_id,
 
         });
     }
     }, [record]); 
 
-  const dispatch = useDispatch()
 
   const isLoading = useSelector((state) =>  state.all.isLoading);
-
+ 
   const  handleAddRole = async () => {
     // dispatch(setLoading(true)); 
     try{
       await post_data('ADDED',gradeData,'/grades','grades')(dispatch);
+      // setgradeData({});
       handleReload() 
       setOpen(false);
+      dispatch(setLoading(false)); 
     }catch(err){
         console.log(err);
     }
@@ -125,7 +131,7 @@ const Roles = ({ type,record }) => {
     <>
  
     {type == 'create' ? (
-      <Button onClick={showModal}>Add Grades/Roles</Button>
+      <Button onClick={showModal} type="primary">Add Grades/Roles</Button>
     ) : (
       <Button onClick={showModal} type="primary">Update</Button>
     )}

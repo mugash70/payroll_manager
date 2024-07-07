@@ -39,7 +39,8 @@ const Roles = ({ type,record }) => {
   const {reloadKey, handleReload} = useReloadKey();
   const dispatch = useDispatch()
   const isLoading = useSelector((state) =>  state.all.isLoading);
-
+  const user_selection = useSelector((state) =>  state.user_selection);
+  
   const [open, setOpen] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [bounds, setBounds] = useState({
@@ -52,7 +53,9 @@ const Roles = ({ type,record }) => {
  const showModal = () => {
     setOpen(true);
   };
-  const [AdjsData, setAdjsData] = useState({});
+  const [AdjsData, setAdjsData] = useState({
+    ent_id:user_selection.ent_id,
+  });
 
     useEffect(() => {
     if (record) {
@@ -60,6 +63,7 @@ const Roles = ({ type,record }) => {
             grade_name: record.grade_name,
             salary: record.salary,
             payment_period: record.payment_period,
+            ent_id:user_selection.ent_id,
 
         });
     }
@@ -70,7 +74,7 @@ const Roles = ({ type,record }) => {
     dispatch(setLoading(true)); 
     try{
       await post_data('ADDED',AdjsData,'/entity/ent/adjustments','adjustments')(dispatch);
-      setAdjsData({});
+      // setAdjsData({});
       handleReload()
       setOpen(false);
       dispatch(setLoading(false)); 
