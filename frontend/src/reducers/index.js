@@ -6,12 +6,19 @@ import Allreducer from './all'
 import themeReducer from './theme'
 import selectedReducer from './selected'
 
- const rootReducer = combineReducers({
+ const appReducer = combineReducers({
     error: errorReducer,
     auth:Authreducer,
     all:Allreducer,
     theme: themeReducer,
     user_selection:selectedReducer
 })
+const rootReducer = (state, action) => {
+    if (action.type === 'CLEAR_AUTH') {
+      state = undefined;
+    }
+    return appReducer(state, action);
+  };
+  
 
 export default rootReducer;

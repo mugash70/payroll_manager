@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, Col,Row } from 'antd';
 import Layoutx  from '../default/layout';
 import { Link } from 'react-router-dom';
 import { useDispatch,useSelector  } from 'react-redux';
+import {post_data,get_data,update_data,del_data} from '../../actions/all'
 import { TeamOutlined,FolderViewOutlined,HomeOutlined,DeploymentUnitOutlined,DollarOutlined,HourglassOutlined } from '@ant-design/icons';
 const breadcrumbs = ['dashboard'];
 const gridStyle = {
@@ -104,13 +105,36 @@ return(
 
 // const Home = () => <Layoutx breadcrumsx={breadcrumbs} titlex={selectedEntity && selectedEntity.ent_name} DashComponent={Homedash} />;
 const Home = () => {
-  const { entities, user_selection } = useSelector((state) => ({
-    entities: state.all.entities.data,
+  const { entities, user_selection,user } = useSelector((state) => ({
+    entities: state.all.entities,
     user_selection: state.user_selection,
+    user:state.auth.user,
   }));
 
-  const selectedEntity = entities.find(entity => entity.ent_id === user_selection.ent_id);
+  const dispatch = useDispatch();
+  const [selectedEntity, setSelectedEntity] = useState(null);
 
+  useEffect(() => {
+    const fetchEntity = async () => {
+      if (entities.length > 0) {
+        const entity = entities.find(entity => entity.ent_id === user_selection.ent_id);
+        setSelectedEntity(entity);
+      } else {
+        try {
+          const entityId = user.ent_id || user_selection.ent_id;
+          const fetchedEntity = await get_data(`/entity/get/${entityId}`, 'entities')(dispatch);
+          setSelectedEntity(fetchedEntity.data[0]);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+  
+    if (!selectedEntity) {
+      fetchEntity();
+    }
+  }, [entities, user_selection, user?.ent_id, dispatch, selectedEntity]);
+  
   return (
     <Layoutx breadcrumsx={breadcrumbs} titlex={selectedEntity && selectedEntity.ent_name} DashComponent={Homedash} />
   );

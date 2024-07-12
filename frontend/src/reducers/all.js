@@ -31,13 +31,23 @@ export default function Allreducer(state = initialState, action) {
           },
           isLoading: false,
         };
-      case DELETED:
-        const deletedItemId = action.payload;
-        const updatedDataAfterDelete = state[action.dataType].data.filter(item => item.id !== deletedItemId);
+      // case DELETED:
+      //   const deletedItemId = action.payload;
+      //   const updatedDataAfterDelete = state[action.dataType].data.filter(item => item.id !== deletedItemId);
+      //   return {
+      //     ...state,
+      //     [action.dataType]: {
+      //       ...state[action.dataType],
+      //       data: updatedDataAfterDelete,
+      //     },
+      //   };
+      case 'DELETED':
+        const { payload: deletedItemId, dataType: deletedDataType, key: deleteKey } = action;
+        const updatedDataAfterDelete = state[deletedDataType].data.filter(item => item[deleteKey] !== deletedItemId);
         return {
           ...state,
-          [action.dataType]: {
-            ...state[action.dataType],
+          [deletedDataType]: {
+            ...state[deletedDataType],
             data: updatedDataAfterDelete,
           },
         };
@@ -54,26 +64,28 @@ export default function Allreducer(state = initialState, action) {
               msg: msg || '',
           };
     
-        // const addedItem = action.payload;
-        // return {
-        //   ...state,
-        //   [action.dataType]: {
-        //     ...state[action.dataType],
-        //     data: [...(state[action.dataType].data || []), addedItem],
-        //   },
-        //   msg: action.payload.msg || '',
-        // };
-
-      case UPDATED:
-        const updatedItem = action.payload;
-        const updatedData = state[action.dataType].data.map(item =>item.emp_id === updatedItem.emp_id ? { ...item, ...updatedItem } : item);
-        return {
-          ...state,
-          [action.dataType]: {
-            ...state[action.dataType],
-            data: updatedData,
-          },
-        };
+          case 'UPDATED':
+            const { payload: updatedItem, dataType, key } = action;
+            const updatedData = state[dataType].data.map(item =>
+              item[key] === updatedItem[key] ? { ...item, ...updatedItem } : item
+            );
+            return {
+              ...state,
+              [dataType]: {
+                ...state[dataType],
+                data: updatedData,
+              },
+            };
+      // case UPDATED:
+      //   const updatedItem = action.payload;
+      //   const updatedData = state[action.dataType].data.map(item =>item.emp_id === updatedItem.emp_id ? { ...item, ...updatedItem } : item);
+      //   return {
+      //     ...state,
+      //     [action.dataType]: {
+      //       ...state[action.dataType],
+      //       data: updatedData,
+      //     },
+      //   };
       
       case LOADED_FAIL:
         return {

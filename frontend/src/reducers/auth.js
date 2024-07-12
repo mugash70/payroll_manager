@@ -45,6 +45,7 @@ export default function Authreducer(state = initialState, action) {
        
         case CLEAR_AUTH:
           localStorage.clear();
+          
     
           return initialState
         default:

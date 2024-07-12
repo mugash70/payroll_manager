@@ -10,25 +10,25 @@ router.post("/", async (req, res) => {
     try {
 
       await client.query('BEGIN');
-      var id = generateRandomNumber('O')
-      let {org_name,logo,email, phone,ent} = req.body;
+      var id = generateRandomNumber('OR')
+      let {org_name,logo,email, phone,created_by,Has_entity} = req.body;
         try {  
-          await client.query(
-            `INSERT INTO "organizations" (org_name,logo,email, phone,"Has_entity","Organization_id") VALUES($1, $2, $3, $4,$5,$6) RETURNING *`,
-            [org_name,logo,email, phone,ent,id]
+          const response = await client.query(
+            `INSERT INTO "organizations" (org_name,logo,email, phone,"Has_entity","org_id","created_by") VALUES($1, $2, $3, $4,$5,$6,$7) RETURNING *`,
+            [org_name,logo,email, phone,Has_entity,id,created_by]
           );
           await client.query('COMMIT');
-          res.json("created successfully!");
+          res.json({data:response.rows[0]});
         } catch (error) {
           await client.query('ROLLBACK');
           console.error(error.message);
-          res.status(500).json("Error occurred while creating!");
+          res.status(500).json(error.message);
         } finally {
           client.release();
         }
     } catch (err) {
       console.error(err.message);
-      res.status(500).json("Error occurred while creating!");
+      res.status(500).json(error.message);
     }
   })
 
@@ -43,8 +43,9 @@ router.get("/", async (req,res)=>{
       }
     });
   }
-  catch {
+  catch(error) {
     console.log(error);
+    res.status(500).json(error.message);
   }
 }  
 )
@@ -57,12 +58,12 @@ router.get('/:id', async (req, res) => {
     await client.query('BEGIN');
     const response = await client.query('SELECT * FROM "organizations" WHERE "Organization_id" = $1', [id]);
     const organization = response.rows[0];
-    res.json([organization, `This ${id} shows that organization information has been retrieved successfully`]);
+    res.json({data:response.rows[0]});
     await client.query('COMMIT');
   } catch (error) {
     await client.query('ROLLBACK');
     console.error(error.message);
-    res.status(500).json('Error occurred while fetching organization information');
+    res.status(500).json(error.message);
   } finally {
     client.release();
   }
@@ -100,12 +101,12 @@ router.put('/:id', async (req, res) => {
      updateValues.push(ent);
        updateFields.push('"Has_entity" = $' + updateValues.length);
      }
-    const updateQuery = `UPDATE "organizations" SET ${updateFields.join(', ')} WHERE "Organization_id" = $${updateValues.length + 1} RETURNING *`;
+    const updateQuery = `UPDATE "organizations" SET ${updateFields.join(', ')} WHERE "org_id" = $${updateValues.length + 1} RETURNING *`;
     const values = updateValues.concat(org_id);
     const response = await client.query(updateQuery, values);
     if (response.rows.length > 0) {
       await client.query('COMMIT');
-      res.json('Successfully updated');
+      res.json({data:response.rows});
     } else {
       await client.query('ROLLBACK');
       res.status(404).json('Organization not found');
@@ -113,7 +114,7 @@ router.put('/:id', async (req, res) => {
   } catch (error) {
     await client.query('ROLLBACK');
     console.error(error.message);
-    res.status(500).json('Error occurred while updating organization');
+    res.status(500).json(error.message);
   } finally {
     client.release();
   }

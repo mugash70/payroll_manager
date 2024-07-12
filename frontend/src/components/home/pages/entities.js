@@ -31,10 +31,11 @@ const handleDel= async (dept_id)=>{
 }}
 
 
-const {entitiesData,isLoading,error}= useSelector((state) =>({  
+const {entitiesData,isLoading,error,user_selection}= useSelector((state) =>({  
     entitiesData: state.all.entities.data,
     isLoading:state.all.isLoading,
     error: state.error.id,
+    user_selection:state.user_selection,
 }));
 
   const columns = [
@@ -119,13 +120,13 @@ const {entitiesData,isLoading,error}= useSelector((state) =>({
   ];
   const handleButtonClick = (key, value) => {
     dispatch(setSelected(key, value));
-    navigate('/dashboard/');
+    navigate('/dashboard');
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await get_data('/entity', 'entities')(dispatch); 
+        await get_data(`/entity/${user_selection.org_id}`, 'entities')(dispatch); 
       } catch (err) {
         console.error(err);
       }

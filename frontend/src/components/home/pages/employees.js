@@ -95,13 +95,13 @@ const handleDel= async (dept_id)=>{
 }
 
 const {employeeData,isLoading,error,user_selection} = useSelector((state) =>({ 
-  employeeData: state.all.employees.data,
+  employeeData: state.all.employees,
   isLoading:state.all.isLoading,
   error:state.error.msg,
   user_selection:state.user_selection,
 }));
 
-
+ 
 const dispatch = useDispatch()
 
 useEffect(() => {
@@ -124,7 +124,7 @@ if (isLoading){
 
   return <Table columns={columns} dataSource={[]} />;
 }else{
-    return(<Table columns={columns} dataSource={employeeData} onChange={onChange} />)
+    return(<Table columns={columns} dataSource={employeeData.data} onChange={onChange} />)
 }
 };
 // var titlex ='Greatint'

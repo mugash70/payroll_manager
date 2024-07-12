@@ -5,9 +5,9 @@ module.exports = {
     await queryInterface.createTable('entities', {
       ent_id: {
         allowNull: false,
-        autoIncrement: true,
+        // autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       ent_name: {
         type: Sequelize.STRING
@@ -22,7 +22,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       org_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
       payment_period: {
         type: Sequelize.STRING

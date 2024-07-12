@@ -10,7 +10,7 @@ router.post("/", async (req, res) => {
     try {
 
       await client.query('BEGIN');
-      var id = generateRandomNumber('E')
+      var id = generateRandomNumber('EM')
       let {
         Fnames,
         Lnames,
@@ -66,27 +66,27 @@ router.post("/", async (req, res) => {
             [
               Fnames,
               Lnames,
-              NID,
-              pic_url,
-              address1,
-              address2,
-              grade_id,
-              salary,
-              phone,
-              nhif,
-              nssf,
-              pin,
-              email,
-              periodf,
-              periodt,
-              payment,
-              bankaccountno,
-              dept_id,
-              ent_id,
-              account_type,
-              bankbranch,
-              bankname,
-              contracttype,
+              NID? NID: null,
+              pic_url ? pic_url: null,
+              address1? address1: null,
+              address2 ? address2: null,
+              grade_id ? grade_id: null,
+              salary ? salary: null,
+              phone ? salary: null,
+              nhif? nhif: null,
+              nssf? nssf: null,
+              pin? pin: null,
+              email? email: null,
+              periodf? periodf: null,
+              periodt? periodt: null,
+              payment? payment: null,
+              bankaccountno? bankaccountno: null,
+              dept_id? dept_id: null,
+              ent_id? ent_id: null,
+              account_type? account_type: null,
+              bankbranch? bankbranch: null,
+              bankname? bankname: null,
+              contracttype? contracttype: null,
               ]
           );
           await client.query('COMMIT');
@@ -94,7 +94,7 @@ router.post("/", async (req, res) => {
         } catch (error) {
           await client.query('ROLLBACK');
           // console.error(error.stack);
-          res.status(500).json(error,"Error occurred while creating!");
+          res.status(500).json(error.stack);
         } finally {
           client.release();
         }
@@ -133,7 +133,7 @@ router.get('/:id', async (req, res) => {
     await client.query('BEGIN');
     var q1 ="SELECT employees.*, departments.dept_name,grades.grade_name,grades.salary FROM employees JOIN departments ON employees.dept_id  = departments.dept_id JOIN grades ON employees.grade_id  = grades.grade_id where  employees.ent_id = $1"
     const response = await client.query(q1, [id]);
-    console.log(response.rows);
+    // console.log(response.rows);
     res.status(200).json(response.rows);
     await client.query('COMMIT');
   } catch (error) {

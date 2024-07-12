@@ -12,10 +12,6 @@ module.exports = {
       dept_name: {
         type: Sequelize.STRING
       },
-      ent_id: {
-        type: Sequelize.INTEGER
-      },
-
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

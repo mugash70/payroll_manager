@@ -74,10 +74,11 @@ const Entities = ({ type,record }) => {
 
 
 
-  var {org_id,error,gradeData} = useSelector(state => ({
+  var {org_id,error,gradeData,user_selection_org} = useSelector(state => ({
     org_id: state.auth.user.org_id,
     error: state.error.msg,
-    gradeData:state.all.grades
+    gradeData:state.all.grades,
+    user_selection_org:state.user_selection.org_id
     // msg:state.auth.msg
 }));
 
@@ -88,7 +89,7 @@ const Entities = ({ type,record }) => {
   };
   const [entData, setentData] = useState({
     ent_name:'',
-    org_id:org_id,
+    org_id:user_selection_org,
   });
 
     useEffect(() => {if (record) {setentData({
@@ -129,7 +130,7 @@ const Entities = ({ type,record }) => {
     try {
       await post_data('ADDED',entData,'/entity','entities')(dispatch);
       setOpen(false);
-      setentData({})
+      // setentData({})
       handleReload()
     } catch (err) {
       console.error(err);

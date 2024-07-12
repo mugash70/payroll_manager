@@ -36,8 +36,10 @@ const { Title,Text } = Typography;
 
 const handleLogout = () => {
   dispatch({type:'CLEAR_AUTH'})
-  persistor.purge(); 
-  navigate('/');
+  persistor.purge().then(() => {
+    localStorage.removeItem('persist:root');
+    navigate('/');
+  });
 };
 
 

@@ -33,6 +33,42 @@ module.exports = {
       'ent_id',
       Sequelize.STRING
     );
+    await queryInterface.addColumn(
+      'employees',
+      'address1',
+      Sequelize.STRING
+    );
+    await queryInterface.addColumn(
+      'employees',
+      'address2',
+      Sequelize.STRING
+    );
+    await queryInterface.addColumn(
+      'organizations',
+      'created_by',
+      Sequelize.STRING
+    );
+    await queryInterface.addColumn(
+      'organizations',
+      'ent_no',
+      Sequelize.BIGINT
+    );
+    await queryInterface.addColumn(
+      'entities',
+      'org_id',
+      Sequelize.STRING
+    );
+  
+    await queryInterface.addColumn(
+      'users',
+      'org_id',
+      Sequelize.STRING
+    );
+    await queryInterface.addColumn(
+      'users',
+      'ent_id',
+      Sequelize.STRING
+    );
   },
 
   async down (queryInterface, Sequelize) {

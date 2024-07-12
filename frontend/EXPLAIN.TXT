@@ -1,0 +1,18 @@
+import AlertMessage from '../../default/AlertMessage'
+
+ <AlertMessage type="success" content="This is a success message" />
+      <AlertMessage type="error" content="This is an error message" />
+      <AlertMessage type="warning" content="This is a warning message" />
+      if (!orgData.Has_entity || !orgData.org_name ) {
+        setShowAlert(prevState => ({
+            ...prevState,
+            num: prevState.num + 1,
+            show: true
+          }));
+        return 
+      }
+      const [showAlert, setShowAlert] = useState({
+        show:false,
+        num:0
+    });
+      

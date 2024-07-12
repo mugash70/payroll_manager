@@ -61,7 +61,7 @@ router.get('/:id', async (req,res)=>{
       FROM "entities" e
       LEFT JOIN "payments" p ON CAST(e.payment AS INTEGER) = p.pay_id
       LEFT JOIN "frequency" pp ON CAST(e.payment_period AS INTEGER) = pp.freq_id 
-      WHERE "org_id" = ${id}
+      WHERE "org_id" = '${id}'
       ORDER BY e.created_at ASC;
       `, (err, response) => {
       if (err) {
@@ -76,7 +76,28 @@ router.get('/:id', async (req,res)=>{
   }
 }  
 )
-
+router.get('/get/:id', async (req,res)=>{
+  const { id } = req.params;
+  try {
+    await pool.query(`SELECT e.*, p.*, pp.*
+      FROM "entities" e
+      LEFT JOIN "payments" p ON CAST(e.payment AS INTEGER) = p.pay_id
+      LEFT JOIN "frequency" pp ON CAST(e.payment_period AS INTEGER) = pp.freq_id 
+      WHERE e.ent_id = '${id}'
+      ORDER BY e.created_at ASC;
+      `, (err, response) => {
+      if (err) {
+        console.log(err.stack);
+      } else {
+        res.status(200).json(response.rows);
+      }
+    });
+  }
+  catch(error) {
+    console.log(error);
+  }
+}  
+)
 
 
 router.put('/:id', async (req, res) => {
