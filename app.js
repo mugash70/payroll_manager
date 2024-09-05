@@ -45,26 +45,17 @@ app.use('/upload', uploadpic);
 app.use('/employees', EmpRoute);
 app.use('/entity', EntRoute);
 app.use('/grades', GrRoute);
-app.use('/transactions', transactions);
-
-
+app.use('/transactions', transactions)
 app.use(express.static(path.join(__dirname, 'frontend/build')));
-
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
 });
-
 app.use(cookieP())
-
 app.use(flash());
-//error handler
 app.use(function (err, req, res, next) {
   res.status(err.status || 500);
-  res.status(500).json({ message: err.message, error: req.app.get('env') === 'development' ? err : {} });
-
+  res.status(500).json({ message: err.message, error: req.app.get('env') === 'dev' ? err : {} });
 });
-
-
 app.listen(process.env.PORT, () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });
