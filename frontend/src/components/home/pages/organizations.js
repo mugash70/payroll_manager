@@ -123,11 +123,13 @@ const {organData,isLoading,error}= useSelector((state) =>({
   };
 
   useEffect(() => {
+  //  console.log("went to fetch")
     const fetchData = async () => {
       try {
         await get_data('/organization', 'organizations')(dispatch); 
+      
       } catch (err) {
-        console.error(err);
+        console.error('this' + err);
       }
     };
     if (reloadKey != 0) {

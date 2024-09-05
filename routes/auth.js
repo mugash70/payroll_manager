@@ -14,8 +14,6 @@ app.post("/login", async (req, res, next) => {
       email = email.toLowerCase();
       await pool.query(`SELECT * FROM users WHERE LOWER(email) = $1`, [email], async (err, response) => {
         validateUser(email,password);
-      
-   
         if (err) {console.log(err.stack)} else {
           if (response.rows.length === 0) {res.status(400).json("user not found")}
           

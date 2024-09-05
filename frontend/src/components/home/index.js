@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef  } from 'react';
 import { Card, Col,Row } from 'antd';
 import Layoutx  from '../default/layout';
 import { Link } from 'react-router-dom';
@@ -104,18 +104,57 @@ return(
 
 
 // const Home = () => <Layoutx breadcrumsx={breadcrumbs} titlex={selectedEntity && selectedEntity.ent_name} DashComponent={Homedash} />;
+// const Home = () => {
+//   const { entities, user_selection,user } = useSelector((state) => ({
+//     entities: state.all.entities,
+//     user_selection: state.user_selection,
+//     user:state.auth.user,
+//   }));
+
+//   const dispatch = useDispatch();
+//   const [selectedEntity, setSelectedEntity] = useState(null);
+
+//   useEffect(() => {
+//     const fetchEntity = async () => {
+//       if (entities.length > 0) {
+//         const entity = entities.find(entity => entity.ent_id === user_selection.ent_id);
+//         setSelectedEntity(entity);
+//       } else {
+//         try {
+//           const entityId = user.ent_id || user_selection.ent_id;
+//           const fetchedEntity = await get_data(`/entity/get/${entityId}`, 'entities')(dispatch);
+//           setSelectedEntity(fetchedEntity.data[0]);
+//         } catch (err) {
+//           console.error(err);
+//         }
+//       }
+//     };
+  
+//     if (!selectedEntity) {
+//       fetchEntity();
+//     }
+//   }, [entities, user_selection, user?.ent_id, dispatch, selectedEntity]);
+
+  
+//   return (
+//     <Layoutx breadcrumsx={breadcrumbs} titlex={selectedEntity && selectedEntity.ent_name} DashComponent={Homedash} />
+//   );
+// };
 const Home = () => {
-  const { entities, user_selection,user } = useSelector((state) => ({
+  const { entities, user_selection, user } = useSelector((state) => ({
     entities: state.all.entities,
     user_selection: state.user_selection,
-    user:state.auth.user,
+    user: state.auth.user,
   }));
 
   const dispatch = useDispatch();
   const [selectedEntity, setSelectedEntity] = useState(null);
+  const entityFetched = useRef(false); // Track if the entity has been fetched
 
   useEffect(() => {
     const fetchEntity = async () => {
+      if (entityFetched.current) return; // Skip if entity has been fetched
+
       if (entities.length > 0) {
         const entity = entities.find(entity => entity.ent_id === user_selection.ent_id);
         setSelectedEntity(entity);
@@ -124,21 +163,21 @@ const Home = () => {
           const entityId = user.ent_id || user_selection.ent_id;
           const fetchedEntity = await get_data(`/entity/get/${entityId}`, 'entities')(dispatch);
           setSelectedEntity(fetchedEntity.data[0]);
+          entityFetched.current = true; // Mark entity as fetched
         } catch (err) {
           console.error(err);
         }
       }
     };
-  
+
     if (!selectedEntity) {
       fetchEntity();
     }
   }, [entities, user_selection, user?.ent_id, dispatch, selectedEntity]);
-  
+
   return (
     <Layoutx breadcrumsx={breadcrumbs} titlex={selectedEntity && selectedEntity.ent_name} DashComponent={Homedash} />
   );
 };
-
 
 export default Home;

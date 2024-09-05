@@ -18,6 +18,7 @@ const EmpRoute = require("./routes/employees")
 const EntRoute = require("./routes/entity")
 
 const GrRoute = require("./routes/grades")
+const transactions = require("./routes/transactions")
 const RoleRoute = require("./routes/role")
 const ReportsRoute = require("./routes/report")
 const BDRoute = require("./routes/employees")
@@ -44,13 +45,11 @@ app.use('/upload', uploadpic);
 app.use('/employees', EmpRoute);
 app.use('/entity', EntRoute);
 app.use('/grades', GrRoute);
+app.use('/transactions', transactions);
 
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'frontend/build')));
-}else{
-  app.use(express.static(path.join(__dirname, 'frontend/build')));
-}
+app.use(express.static(path.join(__dirname, 'frontend/build')));
+
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
 });

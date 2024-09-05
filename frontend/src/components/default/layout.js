@@ -1,5 +1,5 @@
 import React, {useEffect, useState } from 'react';
-import {DesktopOutlined,FileOutlined,PieChartOutlined,TeamOutlined,LogoutOutlined,UserOutlined,MoonOutlined,SunOutlined} from '@ant-design/icons';
+import {DesktopOutlined,FileOutlined,PieChartOutlined,TeamOutlined,LogoutOutlined,UserOutlined,MoonOutlined,SunOutlined,BlockOutlined,DollarOutlined } from '@ant-design/icons';
 import {Button, Result ,Breadcrumb, Layout, Menu, theme,Col, Row,Switch,ConfigProvider,Typography} from 'antd';
 import {useSelector,useDispatch} from 'react-redux';
 import { useNavigate,Link } from "react-router-dom";
@@ -51,8 +51,9 @@ function getItem(labelx, key, icon, link) {
 
 const items = [
   getItem('Home', '2', <DesktopOutlined />,'/dashboard'),
-  getItem('Organizations', 'sub1', <UserOutlined />, '/organizations'),
+  getItem('Organizations', 'sub1', <BlockOutlined  />, '/organizations'),
   getItem('Entities', 'sub2', <TeamOutlined />, '/entities'),
+  getItem('Payroll', 'main', <DollarOutlined />,'/payroll'),
   getItem('Reports', '9', <FileOutlined />,'/reports'),
   {
     key: 'userRole',

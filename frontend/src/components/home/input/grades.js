@@ -72,13 +72,13 @@ const Roles = ({ type,record }) => {
   const isLoading = useSelector((state) =>  state.all.isLoading);
  
   const  handleAddRole = async () => {
-    // dispatch(setLoading(true)); 
+    dispatch(setLoading(true)); 
     try{
       await post_data('ADDED',gradeData,'/grades','grades')(dispatch);
       // setgradeData({});
       handleReload() 
       setOpen(false);
-      dispatch(setLoading(false)); 
+      dispatch(setLoading(false),'grades'); 
     }catch(err){
         console.log(err);
     }

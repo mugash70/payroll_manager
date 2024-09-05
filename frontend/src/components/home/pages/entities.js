@@ -1,7 +1,7 @@
 import React, { useEffect,useState } from 'react';
 import { Table,Button,Row,Col,Avatar,Skeleton,Space,Text} from 'antd';
 import Layoutx  from '../../default/layout';
-import {post_data,get_data,update_data,del_data} from '../../../actions/all'
+import {post_data,get_data,update_data,del_data,selectedEnt} from '../../../actions/all'
 import { useNavigate } from "react-router-dom";
 import Enti from '../../home/input/entities'
 
@@ -119,12 +119,15 @@ const {entitiesData,isLoading,error,user_selection}= useSelector((state) =>({
 
   ];
   const handleButtonClick = (key, value) => {
+    dispatch(selectedEnt());
     dispatch(setSelected(key, value));
     navigate('/dashboard');
   };
 
   useEffect(() => {
+
     const fetchData = async () => {
+      console.error("err.....................................");
       try {
         await get_data(`/entity/${user_selection.org_id}`, 'entities')(dispatch); 
       } catch (err) {

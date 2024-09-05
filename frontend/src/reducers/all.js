@@ -1,4 +1,4 @@
-import {CLEAR_MSG,LOADED,LOADED_FAIL,CLEAR_ALL,SET_LOADING,UPDATED,ADDED,DELETED} from '../actions/types'
+import {CLEAR_MSG,SELECTED_ORG,SELECTED_ENT,LOADED,LOADED_FAIL,CLEAR_ALL,SET_LOADING,UPDATED,ADDED,DELETED} from '../actions/types'
 
 
 var initialState = {
@@ -31,17 +31,23 @@ export default function Allreducer(state = initialState, action) {
           },
           isLoading: false,
         };
-      // case DELETED:
-      //   const deletedItemId = action.payload;
-      //   const updatedDataAfterDelete = state[action.dataType].data.filter(item => item.id !== deletedItemId);
-      //   return {
-      //     ...state,
-      //     [action.dataType]: {
-      //       ...state[action.dataType],
-      //       data: updatedDataAfterDelete,
-      //     },
-      //   };
-      case 'DELETED':
+      case SELECTED_ENT:
+        return {
+          ...state,
+          departments: [],
+          grades: [],
+          employees: [],
+          transactions: [],
+          adjustments: [],
+          organizations: [],
+          entities: [],
+      };
+      case SELECTED_ORG:
+        return {
+          ...state,
+          entities: [],
+      };
+      case DELETED:
         const { payload: deletedItemId, dataType: deletedDataType, key: deleteKey } = action;
         const updatedDataAfterDelete = state[deletedDataType].data.filter(item => item[deleteKey] !== deletedItemId);
         return {
@@ -64,7 +70,7 @@ export default function Allreducer(state = initialState, action) {
               msg: msg || '',
           };
     
-          case 'UPDATED':
+          case UPDATED:
             const { payload: updatedItem, dataType, key } = action;
             const updatedData = state[dataType].data.map(item =>
               item[key] === updatedItem[key] ? { ...item, ...updatedItem } : item

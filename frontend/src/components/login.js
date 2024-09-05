@@ -26,7 +26,7 @@ export default function App() {
   
   const onFinish = async (values) => {
     dispatch({type:'AUTH_LOADING'});
-    await post_data('SUCCESS',values, 'user/login', 'SUCCESS')(dispatch)
+    await post_data('SUCCESS',values, '/user/login', 'SUCCESS')(dispatch)
   };
   useEffect(() => {
     let timeoutId;

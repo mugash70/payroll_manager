@@ -131,9 +131,17 @@ router.get('/:id', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    var q1 ="SELECT employees.*, departments.dept_name,grades.grade_name,grades.salary FROM employees JOIN departments ON employees.dept_id  = departments.dept_id JOIN grades ON employees.grade_id  = grades.grade_id where  employees.ent_id = $1"
-    const response = await client.query(q1, [id]);
-    // console.log(response.rows);
+     var q1 =`
+     SELECT employees.*,
+     departments.dept_name,
+     grades.grade_name,
+     grades.salary 
+     FROM employees 
+     INNER JOIN departments ON employees.dept_id  = departments.dept_id
+     INNER JOIN grades ON employees.grade_id  = grades.grade_id 
+     where  employees.ent_id = $1
+     ORDER BY employees.created_at ASC;`
+   const response = await client.query(q1, [id]);
     res.status(200).json(response.rows);
     await client.query('COMMIT');
   } catch (error) {

@@ -21,7 +21,7 @@ import { Button, Modal,
     Upload, } from 'antd';
 import axios from 'axios';
 import {BASE_API_URL} from '../../../actions/types'
-import {post_data} from '../../../actions/all'
+import {post_data,setLoading} from '../../../actions/all'
 import {useReloadKey} from '../../default/index'; 
 const { TextArea } = Input;
 const normFile = (e) => {
@@ -66,11 +66,14 @@ const Departments = ({ type,record }) => {
   const dispatch = useDispatch()
 
   const  handleAddDept = async () => {
+    dispatch(setLoading(true)); 
     try {
       await post_data('ADDED',deptData,'/entity/ent/departments','departments')(dispatch);
       setOpen(false);
       // setdeptData({})
       handleReload()
+      // setOpen(false);
+      dispatch(setLoading(false)); 
     } catch (err) {
       console.error(err);
     }}

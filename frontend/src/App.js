@@ -8,6 +8,7 @@ import Forgot from './components/forgot'
 
 import Organization from './components/home/pages/organizations'
 import Entities from './components/home/pages/entities'
+// 
 
 import Employees from './components/home/pages/employees'
 import Roles from './components/home/pages/role'
@@ -16,6 +17,7 @@ import Others from './components/home/pages/others'
 import Reports from './components/home/pages/reports'
 import Bd from './components/home/pages/b_d'
 import ED from './components/home/input/emp_details'
+import Pay from './components/home/pages/payroll'
 import { ConfigProvider } from 'antd';
 // import history from './history';
 function App() {
@@ -31,6 +33,8 @@ function App() {
 
           <Route exact path='/dashboard' element={<Home />} />
 
+          <Route exact path='/payroll' element={<Pay />} />
+       
             {/* <Route exact path='/dashboard/:id' element={<Home />} /> */}
             <Route exact path='/employees' element={<Employees />} />
             <Route exact path='/departments' element={<Departments />} />

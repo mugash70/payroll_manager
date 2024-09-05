@@ -1,13 +1,11 @@
 import { findErrors } from './error'
 import axios from 'axios';
-import {LOADED_FAIL,LOADED,BASE_API_URL,SET_LOADING,DELETED,UPDATED,SET_SELECTED,SET_REMOVE,ADDED,SET_THEME} from './types'
+import {LOADED_FAIL,SELECTED_ENT,SELECTED_ORG,LOADED,BASE_API_URL,SET_LOADING,DELETED,UPDATED,SET_SELECTED,SET_REMOVE,ADDED,SET_THEME} from './types'
 
-export const setLoading = (isLoading) => ({
-  type: SET_LOADING,
-  isLoading,
-});
-
-
+export const setLoading = (isLoading) => ({type: SET_LOADING,isLoading});
+export const selectedOrg = () => ({type: SELECTED_ORG});
+export const selectedEnt = () => ({type: SELECTED_ENT});
+ 
 export const handleUpload = async (selectedImage) => {
   try {
     const formData = new FormData();
@@ -26,7 +24,6 @@ export const handleUpload = async (selectedImage) => {
 export const post_data = (type, postdata, path, types) => async dispatch => {
   const config = { headers: { "Content-type": "application/json" } };
   const body = JSON.stringify(postdata);
-
   try {
     const res = await axios.post(`${BASE_API_URL}${path}`, body, config);
     dispatch({ type, payload: res.data, dataType: types });

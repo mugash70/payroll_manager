@@ -19,7 +19,8 @@ router.post("/", async (req, res) => {
             [grade_name,salary,payment_period,ent_id]
           );
           await client.query('COMMIT');
-          res.json(result.rows);
+          // res.json(result.rows);
+          res.json({data:result.rows[0]});
         } catch (error) {
           await client.query('ROLLBACK');
           console.error(error.message);
