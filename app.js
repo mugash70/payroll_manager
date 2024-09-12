@@ -7,9 +7,12 @@ require("dotenv").config();
 const app = express();
 const cors = require("cors");
 const path = require("path");
-const session=require('express-session')
-const cookieP=require('cookie-parser')
 
+const session=require('express-session')
+const PgSession = require('connect-pg-simple')(session);
+
+const cookieP=require('cookie-parser')
+const verifyToken =require("./middleware/authmiddleware.js")
 //route 
 const authRoutes = require("./routes/auth");
 const OrgRoutes = require("./routes/organization");
@@ -23,6 +26,7 @@ const RoleRoute = require("./routes/role")
 const ReportsRoute = require("./routes/report")
 const BDRoute = require("./routes/employees")
 
+const pool = require("./database/config.js");
 //middleware
 app.use(cors());
 
@@ -30,22 +34,31 @@ app.use(cors());
 var Oneday= 1000*60*60*24
 
 app.use(session({
+  // secret:process.env.JWTSTUFF,
+  // saveUninitialized:true,
+  // cookie:{maxAge:Oneday},
+  // resave:false
+  store: new PgSession({pool: pool, tableName: 'session' }),
   secret:process.env.JWTSTUFF,
-  saveUninitialized:true,
-  cookie:{maxAge:Oneday},
-  resave:false
+  resave: false,
+  saveUninitialized: false, 
+  cookie: { 
+    secure: false,
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }))
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use('/user', authRoutes);
-app.use('/organization', OrgRoutes);
-app.use('/upload', uploadpic);
-app.use('/employees', EmpRoute);
-app.use('/entity', EntRoute);
-app.use('/grades', GrRoute);
-app.use('/transactions', transactions)
+app.use('/user',authRoutes);
+app.use('/organization',verifyToken,OrgRoutes);
+app.use('/upload',uploadpic);
+app.use('/employees',verifyToken,EmpRoute);
+app.use('/entity',verifyToken, EntRoute);
+app.use('/grades',verifyToken, GrRoute);
+app.use('/transactions',verifyToken, transactions)
+app.use(express.static(path.join(__dirname, 'middleware')));
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));

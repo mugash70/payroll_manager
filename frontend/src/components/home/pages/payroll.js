@@ -63,7 +63,7 @@ const {entitiesData,isLoading,error,user_selection}= useSelector((state) =>({
   const columns = [
 
     {
-      title: 'Grade',
+      title: 'Transaction ID',
       dataIndex: 'grade_name',
       defaultSortOrder: 'descend',
       sorter: (a, b) =>  b.dept_id-a.dept_id ,

@@ -2,6 +2,11 @@ import { findErrors } from './error'
 import axios from 'axios';
 import {LOADED_FAIL,SELECTED_ENT,SELECTED_ORG,LOADED,BASE_API_URL,SET_LOADING,DELETED,UPDATED,SET_SELECTED,SET_REMOVE,ADDED,SET_THEME} from './types'
 
+let token = localStorage.getItem('token') ? localStorage.getItem('token'):null
+const config = { headers: { "Content-type": "application/json",
+  ...(token && { "Authorization": `${token}` })  } };
+
+  
 export const setLoading = (isLoading) => ({type: SET_LOADING,isLoading});
 export const selectedOrg = () => ({type: SELECTED_ORG});
 export const selectedEnt = () => ({type: SELECTED_ENT});
@@ -13,19 +18,18 @@ export const handleUpload = async (selectedImage) => {
     const response = await axios.post(`${BASE_API_URL}/upload`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
-    return response.data?.imageUrl || ''; // Safely access imageUrl
+    return response.data?.imageUrl || '';
   } catch (error) {
     console.error('Error uploading image:', error);
-    return ''; // Return an empty string or handle accordingly
+    return '';
   }
 };
 
 // Post data
 export const post_data = (type, postdata, path, types) => async dispatch => {
-  const config = { headers: { "Content-type": "application/json" } };
   const body = JSON.stringify(postdata);
   try {
-    const res = await axios.post(`${BASE_API_URL}${path}`, body, config);
+    const res = await axios.post(`${BASE_API_URL}${path}`, body,config);
     dispatch({ type, payload: res.data, dataType: types });
     return res;
   } catch (error) {
@@ -39,8 +43,9 @@ export const post_data = (type, postdata, path, types) => async dispatch => {
 
 // Get data
 export const get_data = (path, types) => async dispatch => {
+  
   try {
-    const res = await axios.get(`${BASE_API_URL}${path}`);
+    const res = await axios.get(`${BASE_API_URL}${path}`,config);
     dispatch({ type: LOADED, payload: res.data, dataType: types });
     return res;
   } catch (error) {
@@ -54,7 +59,6 @@ export const get_data = (path, types) => async dispatch => {
 
 // Update data
 export const update_data = (updatedata, path, types,key) => async dispatch => {
-  const config = { headers: { "Content-type": "application/json" } };
   const body = JSON.stringify(updatedata);
 
   try {
@@ -71,8 +75,6 @@ export const update_data = (updatedata, path, types,key) => async dispatch => {
 };
 
 export const del_data = (path, types,key) => async dispatch => {
-  const config = { headers: { "Content-type": "application/json" } };
-
   try {
     const res = await axios.delete(`${BASE_API_URL}${path}`, config);
     dispatch({ type: DELETED, payload: res.data, dataType: types,key:key });

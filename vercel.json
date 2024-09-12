@@ -11,5 +11,8 @@
         "src": "/(.*)",
         "dest": "app.js"
       }
+    ],
+    "files": [
+      "./middleware/ca.crt"
     ]
   }
