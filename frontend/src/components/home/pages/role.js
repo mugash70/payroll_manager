@@ -7,7 +7,7 @@ import Roles from '../../home/input/grades'
 import {useReloadKey} from '../../default/index'
 import Spinner from '../../default/spinner';
 import Confrim from '../../default/confrim'
-import {post_data,get_data,update_data,del_data} from '../../../actions/all'
+import {post_data,get_data,update_data,del_data,setLoading} from '../../../actions/all'
 
 
 const breadcrumbs = ['dashboard','roles'];
@@ -76,11 +76,12 @@ const handleDel= async (grade_id)=>{ ;try { await del_data(`/grades/${grade_id}`
 useEffect(() => {
 
   const fetchData = async () => {
+    dispatch(setLoading(true))
     try {
       await get_data(`/grades/${user_selection.ent_id}`, 'grades')(dispatch);   
     } catch (err) {
       console.error(err);
-    }
+    }finally{dispatch(setLoading(false))}
   };
   if (reloadKey != 0) {
   fetchData();

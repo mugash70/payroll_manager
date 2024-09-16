@@ -3,10 +3,11 @@ import React, { useEffect } from 'react';
 import { Button, Checkbox, Form, Grid, Input, theme, Typography,Card,Alert} from "antd";
 import Animate from './default/animate'
 import { LockOutlined, MailOutlined } from "@ant-design/icons";
-import {post_data} from '../actions/all'
+import {post_data,setLoading} from '../actions/all'
 import { useDispatch,useSelector  } from 'react-redux';
 import { Navigate } from "react-router-dom";
 import {clearError } from '../actions/error'
+import Spinner from './default/spinner';
 const { useToken } = theme;
 const { useBreakpoint } = Grid;
 const { Text, Title, Link } = Typography;
@@ -25,8 +26,13 @@ export default function App() {
 }));
   
   const onFinish = async (values) => {
+    dispatch(setLoading(true))
     dispatch({type:'AUTH_LOADING'});
-    await post_data('SUCCESS',values, '/user/login', 'SUCCESS')(dispatch)
+    try{
+      await post_data('SUCCESS',values, '/user/login', 'SUCCESS')(dispatch)
+    }catch(error){console.log(error);
+    }finally{dispatch(setLoading(false))}
+
   };
   useEffect(() => {
     let timeoutId;
@@ -71,7 +77,9 @@ export default function App() {
       fontSize: screens.md ? token.fontSizeHeading2 : token.fontSizeHeading3
     }
   };
-
+  if (isLoading){
+    return <Spinner/>
+ }else{
   return (
     <div id='large-header'>
 
@@ -133,4 +141,5 @@ export default function App() {
         </div>
         </div>
   );
+}
 }

@@ -1,7 +1,7 @@
 import React, { useEffect,useState } from 'react';
 import { Table,Button,Row,Col} from 'antd';
 import Layoutx  from '../../default/layout';
-import {post_data,get_data,update_data,del_data} from '../../../actions/all'
+import {post_data,get_data,update_data,del_data,setLoading} from '../../../actions/all'
 import Ded from '../../home/input/adjustments'
 import Spinner from '../../default/spinner';
 import Confrim from '../../default/confrim'
@@ -106,11 +106,12 @@ const handleDel= async (adj_id)=>{
 
   useEffect(() => {
     const fetchData = async () => {
+      dispatch(setLoading(true))
       try {
         await get_data( `/entity/ent/adjustments/${user_selection.ent_id}`, 'adjustments')(dispatch); 
       } catch (err) {
         console.error(err);
-      }
+      }finally{dispatch(setLoading(false))}
     };
     if(reloadKey != 0){fetchData();}
   }, [dispatch,reloadKey]);

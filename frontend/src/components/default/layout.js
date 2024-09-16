@@ -4,7 +4,8 @@ import {Button, Result ,Breadcrumb, Layout, Menu, theme,Col, Row,Switch,ConfigPr
 import {useSelector,useDispatch} from 'react-redux';
 import { useNavigate,Link } from "react-router-dom";
 import { persistor } from '../../store';
-import { setTheme } from '../../actions/all'; // Import the setTheme action
+import Spinner from '../default/spinner';
+import { setTheme,setLoading } from '../../actions/all'; // Import the setTheme action
 
 const { Content, Footer, Sider } = Layout;
 const { Title,Text } = Typography;
@@ -15,12 +16,13 @@ const { Title,Text } = Typography;
     const [activeIndex, setActiveIndex] = useState(0);
 
     const navigate = useNavigate();
-    const {  user,isAuthenticated ,error, } = useSelector(state => ({
+    const {  user,isAuthenticated ,error,isLoading } = useSelector(state => ({
       // theme: themex
       user: state.auth.user,
       isAuthenticated:state.auth.isAuthenticated,
       error: state.error.msg,
       theme: state.theme.theme,
+      isLoading: state.auth.isLoading,
   }));
 
   const dispatch = useDispatch();
@@ -35,10 +37,12 @@ const { Title,Text } = Typography;
 
 
 const handleLogout = () => {
+  dispatch(setLoading(true))
   dispatch({type:'CLEAR_AUTH'})
   persistor.purge().then(() => {
     localStorage.removeItem('persist:root');
     navigate('/');
+    dispatch(setLoading(false))
   });
 };
 
@@ -119,6 +123,10 @@ const themeOverrides = themex === 'dark' ? {
     colorText: '#000000',
   }
 };
+
+if (isLoading){
+  return <Spinner/>
+}else{
   return (
     <>
  {isAuthenticated?  
@@ -176,5 +184,6 @@ const themeOverrides = themex === 'dark' ? {
   />}
     </>
   );
+}
 };
 export default Layoutx;

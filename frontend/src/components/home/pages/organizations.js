@@ -1,7 +1,7 @@
 import React, { useEffect,useState } from 'react';
 import { Table,Button,Row,Col,Avatar,Skeleton,Space,Text} from 'antd';
 import Layoutx  from '../../default/layout';
-import {post_data,get_data,update_data,del_data} from '../../../actions/all'
+import {post_data,get_data,update_data,del_data,setLoading} from '../../../actions/all'
 import { useNavigate } from "react-router-dom";
 import Orgi from '../../home/input/organizations'
 
@@ -23,12 +23,13 @@ const OrganDash = () => {
 
 const handleDel= async (dept_id)=>{
   try {
+    dispatch(setLoading(true))
     await del_data(`/organization/${dept_id}`, 'organizations')(dispatch);   
     handleReload()
   } catch (err) {
     console.error(err);
 
-}}
+}finally{dispatch(setLoading(false))}}
 
 
 const {organData,isLoading,error}= useSelector((state) =>({  
@@ -125,12 +126,13 @@ const {organData,isLoading,error}= useSelector((state) =>({
   useEffect(() => {
   //  console.log("went to fetch")
     const fetchData = async () => {
+      dispatch(setLoading(true))
       try {
         await get_data('/organization', 'organizations')(dispatch); 
       
       } catch (err) {
         console.error('this' + err);
-      }
+      }finally{dispatch(setLoading(false))}
     };
     if (reloadKey != 0) {
       fetchData();

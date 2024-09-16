@@ -1,7 +1,7 @@
 import React, { useEffect,useState } from 'react';
 import { Table,Button,Row,Col,Avatar,Skeleton,Space,Text} from 'antd';
 import Layoutx  from '../../default/layout';
-import {post_data,get_data,update_data,del_data,selectedEnt} from '../../../actions/all'
+import {post_data,get_data,update_data,del_data,selectedEnt,setLoading} from '../../../actions/all'
 import { useNavigate } from "react-router-dom";
 import Enti from '../../home/input/entities'
 
@@ -127,12 +127,12 @@ const {entitiesData,isLoading,error,user_selection}= useSelector((state) =>({
   useEffect(() => {
 
     const fetchData = async () => {
-      console.error("err.....................................");
+      dispatch(setLoading(true))
       try {
         await get_data(`/entity/${user_selection.org_id}`, 'entities')(dispatch); 
       } catch (err) {
         console.error(err);
-      }
+      }finally{dispatch(setLoading(false))}
     };
     if (reloadKey != 0) {
       fetchData();
@@ -142,8 +142,6 @@ const {entitiesData,isLoading,error,user_selection}= useSelector((state) =>({
   
   const onChange = (pagination, filters, sorter, extra) => {console.log('params', pagination, filters, sorter, extra);};
   
- 
-
   if (isLoading){
     return <Spinner/>
  }else{

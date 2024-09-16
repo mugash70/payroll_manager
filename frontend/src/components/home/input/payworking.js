@@ -5,10 +5,11 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import Layoutx  from '../../default/layout';
 import { useDispatch,useSelector  } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import Spinner from '../../default/spinner';
 import {useReloadKey} from '../../default/index'
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import Draggable from 'react-draggable';
-import {post_data,get_data,update_data,del_data} from '../../../actions/all'
+import {post_data,get_data,update_data,del_data,setLoading} from '../../../actions/all'
 
 const { Title,Text } = Typography;
 const breadcrumbs = ['dashboard','employees','details'];
@@ -17,28 +18,30 @@ const location = useLocation();
 const dispatch = useDispatch()
 const {reloadKey, handleReload} = useReloadKey();
 
-
-useEffect(() => {
-  setTargetOffset(topRef.current?.clientHeight);
-    const fetchData = async () => {
-      try {await get_data(`/transactions/get/${user_selection.ent_id}`, 'transactions')(dispatch); 
-      } catch (err) {console.error(err);}
-    };
-    if(reloadKey != 0){
-      fetchData();
-    }
-    handleReload()
-  },
-  // []);
-  [dispatch,reloadKey,user_selection.ent_id, handleReload]);
-
-
 const {gradesData,isLoading,error,user_selection} = useSelector((state) =>({ 
   gradesData: state.all.transactions.data,
   isLoading:state.all.isLoading,
   error:state.error.msg,
   user_selection:state.user_selection,
 }));
+
+useEffect(() => {
+  dispatch(setLoading(true))
+  setTargetOffset(topRef.current?.clientHeight);
+    const fetchData = async () => {
+      try {await get_data(`/transactions/get/${user_selection.ent_id}`, 'transactions')(dispatch); 
+      } catch (err) {console.error(err);}finally{dispatch(setLoading(false))}
+    };
+    if(reloadKey != 0){
+      fetchData();
+    }
+    handleReload()
+  },
+  []);
+  // [dispatch,reloadKey,user_selection.ent_id, handleReload]);
+
+
+
 
 const [open, setOpen] = useState(false);
 
@@ -78,16 +81,32 @@ const showModal = () => {
     //   console.error(err);
     // }
 }
+var TransData=[]
+
+const handleAddTrans = async ()=>{
+  try {
+      await post_data('ADDED',TransData,'/transactions','transactions')(dispatch);
+      setOpen(false);
+      // setentData({})
+      handleReload()
+    } catch (err) {
+      console.error(err);
+    }
+}
 
   const handleCancel = (e) => {
     setOpen(false);
   };
 
 
-  const topRef = React.useRef(null);
-  const [targetOffset, setTargetOffset] = useState();
+  let topRef = React.useRef(null);
+  let [targetOffset, setTargetOffset] = useState();
+  let totalSalaryAllGrades =0
+  let transformedGradesData=[]
+  let pairedGrades=[]
+  if(gradesData){
 // useEffect(() => {
-  const transformedGradesData = Object.entries(gradesData).map(([gradeName, { salary, employees }]) => ({
+  transformedGradesData = Object.entries(gradesData).map(([gradeName, { salary, employees }]) => ({
     gradeName,
     salary,
     employees,
@@ -99,14 +118,15 @@ const showModal = () => {
     }
     return result;
   };
-  const pairedGrades = groupIntoPairs(transformedGradesData);
+   pairedGrades = groupIntoPairs(transformedGradesData);
 
-  const totalSalaryAllGrades = pairedGrades.reduce((grandTotal, gradePair) => {
+   totalSalaryAllGrades = pairedGrades.reduce((grandTotal, gradePair) => {
     return grandTotal + gradePair.reduce((total, grade) => {
       const totalEmployeeSalary = grade.employees.reduce((total, employee) => total + employee.salary, 0);
       return total + totalEmployeeSalary;
     }, 0);
   }, 0);
+}
 // },[transformedGradesData,pairedGrades,totalSalaryAllGrades]);
 
 
@@ -114,17 +134,20 @@ const showModal = () => {
 
 var Buttonactions = (<>
                 <Button key="back" onClick={handleCancel}>Cancel</Button>
-                <Button key="submit" type="primary" onClick={handleAddEnt}>Payout</Button>
+                <Button key="submit" type="primary" onClick={handleAddTrans}>Payout</Button>
                 <Button key="auto" type="primary" onClick={handleAddEnt} danger>Auto Pay</Button>
 </>)
 
 
-
+// if (isLoading){
+  // return <Spinner/>
+// }else{
   return (
     <>
     <Button onClick={showModal}>Run Payroll</Button>
     <Modal
         open={open}
+        style={{top: 0 }} 
         width={1000}
         onCancel={handleCancel} 
         title={<>
@@ -134,10 +157,7 @@ var Buttonactions = (<>
             <h3>Total Payout: {totalSalaryAllGrades}</h3>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>{Buttonactions}</div></div>
         </>}
-        
         footer={Buttonactions}
-
-        // style={{ maxHeight: '100vh' }}
         modalRender={(modal) => (
           <Draggable
             disabled={disabled}
@@ -181,5 +201,6 @@ var Buttonactions = (<>
    
   </> 
   );
+// }
 };
 export default PayDetails;

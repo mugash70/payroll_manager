@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table,Button,Row,Col,theme,Avatar} from 'antd';
 import { Link } from "react-router-dom";
 import Layoutx  from '../../default/layout';
-import {post_data,get_data,update_data,del_data} from '../../../actions/all'
+import {post_data,get_data,update_data,del_data,setLoading} from '../../../actions/all'
 import { useDispatch,useSelector  } from 'react-redux';
 import Spinner from '../../default/spinner';
 import Alert from '../../default/alert'
@@ -107,12 +107,13 @@ const dispatch = useDispatch()
 useEffect(() => {
     const fetchData = async () => {
       try {
+        dispatch(setLoading(true))
         await get_data(`/employees/${user_selection.ent_id}`, 'employees')(dispatch);
         await get_data(`/grades/${user_selection.ent_id}`, 'grades')(dispatch);
         await get_data(`/entity/ent/departments/${user_selection.ent_id}`, 'departments')(dispatch);        
       } catch (err) {
         console.error(err);
-      }
+      }finally{dispatch(setLoading(false))}
     };
     if(reloadKey != 0){fetchData();}
   }, [dispatch,reloadKey]);

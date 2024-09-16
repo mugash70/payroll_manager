@@ -8,6 +8,7 @@ const config = { headers: { "Content-type": "application/json",
 
   
 export const setLoading = (isLoading) => ({type: SET_LOADING,isLoading});
+
 export const selectedOrg = () => ({type: SELECTED_ORG});
 export const selectedEnt = () => ({type: SELECTED_ENT});
  

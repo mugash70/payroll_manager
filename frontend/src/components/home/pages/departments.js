@@ -1,7 +1,7 @@
 import React, { useEffect,useState } from 'react';
 import { Table,Button,Row,Col,Avatar} from 'antd';
 import Layoutx  from '../../default/layout';
-import {post_data,get_data,update_data,del_data} from '../../../actions/all'
+import {post_data,get_data,update_data,del_data,setLoading} from '../../../actions/all'
 import Dept from '../../home/input/departments'
 import Spinner from '../../default/spinner';
 import Confrim from '../../default/confrim'
@@ -16,12 +16,13 @@ const Deptdash = () => {
 
 const handleDel= async (dept_id)=>{
   try {
+    dispatch(setLoading(true))
     await del_data(`/entity/ent/departments/${dept_id}`, 'departments')(dispatch);   
     handleReload()
   } catch (err) {
     console.error(err);
 
-}}
+}finally{dispatch(setLoading(false))}}
 
 
 
@@ -76,10 +77,11 @@ const {departmentData,isLoading,error,user_selection} = useSelector((state) =>({
   useEffect(() => {
     const fetchData = async () => {
       try {
+        dispatch(setLoading(true))
         await get_data(`/entity/ent/departments/${user_selection.ent_id}`, 'departments')(dispatch); 
       } catch (err) {
         console.error(err);
-      }
+      }finally{dispatch(setLoading(false))}
     };
     if (reloadKey != 0) {
       fetchData();
