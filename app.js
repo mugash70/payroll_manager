@@ -8,8 +8,7 @@ const app = express();
 const cors = require("cors");
 const path = require("path");
 
-const session=require('express-session')
-const PgSession = require('connect-pg-simple')(session);
+
 
 const cookieP=require('cookie-parser')
 const verifyToken =require("./middleware/authmiddleware.js")
@@ -26,19 +25,18 @@ const RoleRoute = require("./routes/role")
 const ReportsRoute = require("./routes/report")
 const BDRoute = require("./routes/employees")
 
+const session=require('express-session')
+const PgSession = require('connect-pg-simple')(session);
 const pool = require("./database/config.js");
 //middleware
 app.use(cors());
 
 //session
-var Oneday= 1000*60*60*24
 
 app.use(session({
-  // secret:process.env.JWTSTUFF,
-  // saveUninitialized:true,
-  // cookie:{maxAge:Oneday},
-  // resave:false
-  store: new PgSession({pool: pool, tableName: 'session' }),
+  store: new PgSession({pool: pool,
+    createTableIfMissing: true, 
+    tableName: 'session' }),
   secret:process.env.JWTSTUFF,
   resave: false,
   saveUninitialized: false, 
@@ -47,6 +45,15 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000
   }
 }))
+
+app.use((req, res, next) => {
+  req.session.save((err) => {
+    if (err) {
+      console.error('Session save error:', err);
+    }
+    next();
+  });
+});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
