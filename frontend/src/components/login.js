@@ -26,12 +26,11 @@ export default function App() {
 }));
   
   const onFinish = async (values) => {
-    dispatch(setLoading(true))
-    dispatch({type:'AUTH_LOADING'});
+    //dispatch(setLoading(true))
+    //dispatch({type:'AUTH_LOADING'});
     try{
       await post_data('SUCCESS',values, '/user/login', 'SUCCESS')(dispatch)
-    }catch(error){console.log(error);
-    }finally{dispatch(setLoading(false))}
+    }catch(error){dispatch(setLoading(false))}finally{dispatch(setLoading(false))}
 
   };
   useEffect(() => {
@@ -77,9 +76,9 @@ export default function App() {
       fontSize: screens.md ? token.fontSizeHeading2 : token.fontSizeHeading3
     }
   };
-  if (isLoading){
+/*   if (isLoading){
     return <Spinner/>
- }else{
+ }else{ */
   return (
     <div id='large-header'>
 
@@ -141,5 +140,5 @@ export default function App() {
         </div>
         </div>
   );
-}
+// }
 }
