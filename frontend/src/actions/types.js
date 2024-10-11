@@ -22,10 +22,10 @@ export const CLEAR_ALL="CLEAR_ALL"
 export const AUTH_LOADING="AUTH_LOADING"
 export const SET_LOADING='SET_LOADING'
 
-export const BASE_API_URL = 'http://127.0.0.1:4000'
+// export const BASE_API_URL = 'http://127.0.0.1:4000'
   // "proxy": "http://localhost:4000",
-
-// export const BASE_API_URL = ''
+// 
+export const BASE_API_URL = ''
 export const SET_THEME = 'SET_SELECTED';
 
 export const SET_SELECTED = 'SET_SELECTED';
