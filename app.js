@@ -65,6 +65,7 @@ app.use('/employees',verifyToken,EmpRoute);
 app.use('/entity',verifyToken, EntRoute);
 app.use('/grades',verifyToken, GrRoute);
 app.use('/transactions',verifyToken, transactions)
+
 app.use(express.static(path.join(__dirname, 'middleware')));
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 app.get('*', (req, res) => {

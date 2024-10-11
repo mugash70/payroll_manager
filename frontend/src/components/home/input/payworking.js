@@ -1,13 +1,15 @@
 import React, { useEffect, useState,useRef  } from 'react';
 import {PlusOutlined,MinusOutlined ,DollarOutlined,CalendarOutlined,FileSearchOutlined,FolderOpenOutlined,LoadingOutlined,TeamOutlined} from '@ant-design/icons';
-import {Col,Row,Modal,Button, Tabs,Avatar, List,Typography,Divider,Skeleton,Descriptions,Table } from 'antd';
+import {Col,Row,Modal,Button, Tabs,Avatar, List,Typography,Divider,Result ,Skeleton,Descriptions,Table,Checkbox } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Layoutx  from '../../default/layout';
 import { useDispatch,useSelector  } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import Complete from '../../default/completed'
 import Spinner from '../../default/spinner';
 import {useReloadKey} from '../../default/index'
 // import 'bootstrap/dist/css/bootstrap.min.css';
+import AlertMessage from '../../default/AlertMessage'
 import Draggable from 'react-draggable';
 import {post_data,get_data,update_data,del_data,setLoading} from '../../../actions/all'
 
@@ -17,14 +19,19 @@ const PayDetails = () => {
 const location = useLocation();
 const dispatch = useDispatch()
 const {reloadKey, handleReload} = useReloadKey();
-
+const [selectedEmployees, setSelectedEmployees] = useState([]);
+const [selectAll, setSelectAll] = useState(false);
+const [AComplete,setAComplete]=useState(false)
 const {gradesData,isLoading,error,user_selection} = useSelector((state) =>({ 
   gradesData: state.all.transactions.data,
   isLoading:state.all.isLoading,
   error:state.error.msg,
   user_selection:state.user_selection,
 }));
-
+const [showAlert, setShowAlert] = useState({
+  show:false,
+  num:0
+});
 useEffect(() => {
   dispatch(setLoading(true))
   setTargetOffset(topRef.current?.clientHeight);
@@ -81,21 +88,34 @@ const showModal = () => {
     //   console.error(err);
     // }
 }
-var TransData=[]
 
-const handleAddTrans = async ()=>{
+
+const handleAddTrans = async (type)=>{
+  dispatch(setLoading(true)) 
+  var trasData =[]
+  // type == 'auto' ? 
   try {
-      await post_data('ADDED',TransData,'/transactions','transactions')(dispatch);
+      await post_data('ADDED',selectedEmployees,'/transactions','transactions')(dispatch);
       setOpen(false);
-      // setentData({})
       handleReload()
+      
     } catch (err) {
       console.error(err);
+      setShowAlert(prevState => ({ ...prevState, num: prevState.num + 1, show: true}));
+    }finally{
+      setAComplete(true)
+      dispatch(setLoading(false))
+      setSelectedEmployees([])
+      setSelectAll(false)
+      // setAComplete(false)
     }
 }
 
   const handleCancel = (e) => {
     setOpen(false);
+    setSelectedEmployees([])
+    setSelectAll(false)
+    setAComplete(false)
   };
 
 
@@ -113,11 +133,12 @@ const handleAddTrans = async ()=>{
   }));
   const groupIntoPairs = (data) => {
     const result = [];
-    for (let i = 0; i < data.length; i += 2) {
-      result.push(data.slice(i, i + 2));
+    for (let i = 0; i < data.length; i += 3) {
+      result.push(data.slice(i, i + 3)); // Slice 3 items at a time
     }
     return result;
   };
+  
    pairedGrades = groupIntoPairs(transformedGradesData);
 
    totalSalaryAllGrades = pairedGrades.reduce((grandTotal, gradePair) => {
@@ -134,17 +155,80 @@ const handleAddTrans = async ()=>{
 
 var Buttonactions = (<>
                 <Button key="back" onClick={handleCancel}>Cancel</Button>
-                <Button key="submit" type="primary" onClick={handleAddTrans}>Payout</Button>
-                <Button key="auto" type="primary" onClick={handleAddEnt} danger>Auto Pay</Button>
+                <Button key="submit" type="primary" onClick={handleAddTrans('select')}>Payout</Button>
+                <Button key="auto" type="primary" onClick={handleAddTrans('auto')} danger>Auto Pay</Button>
+</>)
+  const handleSelect = (employeeId) => {
+    setSelectedEmployees((prevSelected) =>
+      prevSelected.includes(employeeId)
+        ? prevSelected.filter((id) => id !== employeeId)
+        : [...prevSelected, employeeId]
+    );
+  };
+
+
+  const handleSelectAll = (gradeName, employees) => {
+    const isAllSelected = selectAll[gradeName] || false;
+    const newSelectedState = !isAllSelected;
+
+    setSelectAll((prevSelectAll) => ({
+      ...prevSelectAll,
+      [gradeName]: newSelectedState,
+    }));
+
+    setSelectedEmployees((prevSelected) => ({
+      ...prevSelected,
+      [gradeName]: employees.reduce((acc, employee) => {
+        acc[employee.ID] = newSelectedState;
+        return acc;
+      }, {}),
+    }));
+  };
+  const handleIndividualSelect = (gradeName, employeeId) => {
+    setSelectedEmployees((prevSelected) => ({
+      ...prevSelected,
+      [gradeName]: {
+        ...prevSelected[gradeName],
+        [employeeId]: !prevSelected[gradeName]?.[employeeId],
+      },
+    }));
+  };
+var select_list =(       <>
+  {pairedGrades.map((pair, index) => (
+    <Row gutter={[16, 16]} key={index}>
+      {pair.map((grade) => {
+        const totalEmployeeSalary = grade.employees.reduce((total, employee) => total + employee.salary, 0);
+   
+        return (
+          <Col span={8} key={grade.gradeName}>
+            <div>
+              <Title level={3}>{grade.gradeName}</Title>
+              {grade.employees.length >0 ?<> <h4>Salary: {grade.salary} | Total: {totalEmployeeSalary}</h4><Checkbox onChange={() => handleSelectAll(grade.gradeName, grade.employees)} checked={selectAll[grade.gradeName] || false}>Select All </Checkbox></> :null}
+              {grade.employees.map((employee) => (
+                <div key={employee.ID}>
+                  <Checkbox
+                    onChange={() => handleIndividualSelect(grade.gradeName, employee.ID)}
+                    checked={selectedEmployees[grade.gradeName]?.[employee.ID] || false}
+                  >
+                    {employee.firstName} (ID: {employee.ID}) - Salary: {employee.salary}
+                  </Checkbox>
+                </div>
+              ))}
+
+              <Divider />
+            </div>
+          </Col>
+        );
+      
+      })}
+    </Row>
+  ))}
 </>)
 
-
-// if (isLoading){
-  // return <Spinner/>
-// }else{
   return (
     <>
     <Button onClick={showModal}>Run Payroll</Button>
+
     <Modal
         open={open}
         style={{top: 0 }} 
@@ -163,40 +247,19 @@ var Buttonactions = (<>
             disabled={disabled}
             bounds={bounds}
             nodeRef={draggleRef}
-            onStart={(event, uiData) => onStart(event, uiData)}
-          >
+            onStart={(event, uiData) => onStart(event, uiData)}>
+
             <div ref={draggleRef}>{modal}</div>
           </Draggable>
         )}
-      >
+      >  
+        
+          <Divider/>  
+          {null}
+          {isLoading ? <Spinner/>:AComplete ?<Complete operation="Payment Complete"/> :select_list}
           <Divider/>
-        {pairedGrades.map((pair, index) => (
-          <Row gutter={[16, 16]} key={index}>
-            {pair.map((grade) => {
-                  const totalEmployeeSalary = grade.employees.reduce((total, employee) => total + employee.salary, 0);
-            return(<Col span={12} key={grade.gradeName}>
-                <div>
-                  <h4 level={5}><Title level={3}>{grade.gradeName}</Title>Salary: {grade.salary} | Total: {totalEmployeeSalary}</h4>
-                  <List
-                    size="small"
-                    bordered
-                    dataSource={grade.employees}
-                    renderItem={(employee) => (
-                      <List.Item>
-                        <Text>({employee.ID}):{employee.firstName}  - salary : {employee.salary}</Text>
-                      </List.Item>
-                    )}
-                    style={{ maxHeight: '150px', overflowY: 'auto' }} // Scrollable employee list
-                  />
-                </div>
-              </Col>
-              
-            )
-            
-                    })}
-                     <Divider/>
-          </Row>
-        ))}
+          {showAlert.show && <AlertMessage type="error" content="Error running Payroll" num={showAlert.num} />}
+      
       </Modal>
    
   </> 
